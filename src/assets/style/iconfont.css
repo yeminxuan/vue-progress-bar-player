@@ -1,0 +1,25 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4456397 */
+  src: url('/public/font/iconfont.woff2') format('woff2');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-zanting:before {
+  content: "\e638";
+}
+
+.icon-zhongzhi:before {
+  content: "\e628";
+}
+
+.icon-bofang:before {
+  content: "\e889";
+}
+

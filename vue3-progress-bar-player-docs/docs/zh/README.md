@@ -9,7 +9,7 @@ actions:
 
   - text: 安装
     link: https://vuejs.press/guide/introduction.html
-    type: default
+    type: secondary
 
 features:
   - title: Simplicity First
