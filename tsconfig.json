@@ -22,14 +22,21 @@
     "paths": {
       "@/*": ["./src/*"],
       "@assets/*": ["./src/assets/*"],
-      "@common/*": ["./src/common/*"],
+      "@common/*": ["./src/components/common/*"],
       "@components/*": ["./src/components/*"],
       "@store/*": ["./src/store/*"],
       "@views/*": ["./src/views/*"],
       "@style/*": ["./src/style/*"],
-      "@api/*": ["./src/api/*"]
-    }
+      "@api/*": ["./src/api/*"],
+      "@packages/*": ["./src/packages/*"],
+    },
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/types/*.d.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
