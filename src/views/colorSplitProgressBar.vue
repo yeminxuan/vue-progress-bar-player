@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 10:41:37
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-08 10:59:10
+ * @LastEditTime: 2024-03-08 12:19:04
  * @FilePath: /vue3-process-bar-player/src/views/colorSplitProgressBar.vue
  * @Description: 
 -->
@@ -10,10 +10,11 @@
   <div class="colorSplitProcessBar">
     <Example title="颜色分割进度条">
       <ColorSplitProcessBar
+        v-if="splitProgressData.length > 0"
         ref="ColorSplitProcessBarRef"
-        :data="data"
+        :data="splitProgressData"
         @handle-play="handlePlay"
-        :duration="50"
+        :duration="10"
       ></ColorSplitProcessBar>
     </Example>
   </div>
@@ -22,28 +23,11 @@
 import { splitProgressData } from "@/assets/data";
 import ColorSplitProcessBar from "@packages/colorSplitProgressBar/index.vue";
 import Example from "@common/example.vue";
-import { ref, onMounted } from "vue";
-const data = ref([]);
+import { ref } from "vue";
 const ColorSplitProcessBarRef = ref();
-const formatData = () => {
-  let arr: any = [];
-  splitProgressData.forEach((item: any, index: number) => {
-    let obj = {
-      dataIndex: index,
-      ...item,
-    };
-    arr.push(obj);
-  });
-  data.value = arr;
-  console.log(arr);
-  
-};
 const handlePlay = () => {
-  console.log(ColorSplitProcessBarRef.value.getCurrentIndex());
+  console.log(ColorSplitProcessBarRef.value);
 };
-onMounted(() => {
-  formatData();
-});
 </script>
 <style scoped lang="less">
 #colorSplitProcessBar {

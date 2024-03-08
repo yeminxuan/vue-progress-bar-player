@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-06 19:06:46
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-08 10:58:52
+ * @LastEditTime: 2024-03-08 12:54:39
  * @FilePath: /vue3-process-bar-player/src/packages/colorSplitProgressBar/index.vue
  * @Description: 
 -->
@@ -32,7 +32,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import type { Ref } from "vue";
 interface Props {
   data: any;
   duration: number;
@@ -42,53 +43,87 @@ const emits = defineEmits<{
   (e: "skipProgress", event: any): void;
   (e: "handlePlay"): void;
 }>();
+const widthValues: Ref<any[]> = ref([]);
+const computedWidth = () => {
+  widthValues.value = Array.from({ length: props.data.length }, (_, i) => {
+    return {
+      procentage: ((i + 1) * 100) / props.data.length,
+      index: i,
+    };
+  });
+};
 const getCurrentIndex = () => {
   return Math.floor(props.data.length * (procentage.value / 100));
 };
 defineExpose({
   getCurrentIndex,
+  widthValues,
 });
+//Percentage of progress bar
 const procentage = ref(0);
+//Whether the player is playing
 const isPlay = ref(false);
-const timer = ref(null) as any;
+const progressTimer = ref(null) as any;
 const refreshClick = ref(false);
+const dataIndex = ref(0);
+const updateProgress = () => {
+  if (dataIndex.value < props.data.length) {
+    emits("handlePlay");
+    // 设置目标宽度
+    const targetWidth =
+      dataIndex.value == -1 ? 0 : widthValues.value[dataIndex.value].procentage;
+    //Change the progress bar percentage
+    procentage.value = targetWidth;
+    dataIndex.value++;
+    if (targetWidth >= 100) {
+      // If the progress bar ends playing
+      dataIndex.value = 100;
+      clearInterval(progressTimer.value);
+      progressTimer.value = null;
+      isPlay.value = false;
+    }
+  } else {
+    return;
+  }
+};
+const animateProgress = () => {
+  requestAnimationFrame(() => {
+    updateProgress();
+  });
+};
 const play = (status: boolean) => {
   refreshClick.value = true;
   isPlay.value = !status;
   if (isPlay.value) {
     if (procentage.value == 100) {
       refreshClick.value = false;
-      procentage.value = 0;
+      dataIndex.value = -1;
+      procentage.value - 0  
       setTimeout(() => {
         refreshClick.value = true;
       }, 50);
     }
-    timer.value = setInterval(() => {
-      emits("handlePlay");
-      procentage.value += 100 / props.data.length;
-      if (procentage.value >= 100) {
-        procentage.value = 100;
-        clearInterval(timer.value);
-        timer.value = null;
-        isPlay.value = false;
-      }
-    }, 50);
+    progressTimer.value = setInterval(animateProgress, props.duration);
   } else {
-    clearInterval(timer.value);
-    timer.value = null;
+    clearInterval(progressTimer.value);
+    progressTimer.value = null;
     isPlay.value = false;
   }
 };
 const refresh = () => {
   refreshClick.value = false;
-  clearInterval(timer.value);
-  timer.value = null;
+  clearInterval(progressTimer.value);
+  progressTimer.value = null;
   procentage.value = 0;
+  dataIndex.value = -1;
   isPlay.value = false;
 };
 const changeSlider = (e: Event) => {
   emits("skipProgress", e);
 };
+onMounted(() => {
+  computedWidth();
+});
 </script>
 <style scoped lang="less">
 @import "@assets/style/iconfont.css";
@@ -124,6 +159,7 @@ const changeSlider = (e: Event) => {
       height: 100%;
       background-color: #409eff;
       border-radius: 5px;
+      will-change: transition;
       transition: width 0.2s linear;
       border: none;
     }
