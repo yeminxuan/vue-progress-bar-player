@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 10:41:37
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-07 19:24:11
+ * @LastEditTime: 2024-03-08 10:59:10
  * @FilePath: /vue3-process-bar-player/src/views/colorSplitProgressBar.vue
  * @Description: 
 -->
@@ -13,6 +13,7 @@
         ref="ColorSplitProcessBarRef"
         :data="data"
         @handle-play="handlePlay"
+        :duration="50"
       ></ColorSplitProcessBar>
     </Example>
   </div>

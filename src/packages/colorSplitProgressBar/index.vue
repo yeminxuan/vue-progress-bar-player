@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-06 19:06:46
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-07 19:23:12
+ * @LastEditTime: 2024-03-08 10:58:52
  * @FilePath: /vue3-process-bar-player/src/packages/colorSplitProgressBar/index.vue
  * @Description: 
 -->
@@ -35,10 +35,11 @@
 import { ref } from "vue";
 interface Props {
   data: any;
+  duration: number;
 }
 const props = defineProps<Props>();
 const emits = defineEmits<{
-  (e: "skipProgress"): void;
+  (e: "skipProgress", event: any): void;
   (e: "handlePlay"): void;
 }>();
 const getCurrentIndex = () => {
@@ -64,7 +65,7 @@ const play = (status: boolean) => {
     }
     timer.value = setInterval(() => {
       emits("handlePlay");
-      procentage.value += 100 /props.data.length ;
+      procentage.value += 100 / props.data.length;
       if (procentage.value >= 100) {
         procentage.value = 100;
         clearInterval(timer.value);
@@ -86,7 +87,7 @@ const refresh = () => {
   isPlay.value = false;
 };
 const changeSlider = (e: Event) => {
-  emits("skipProgress");
+  emits("skipProgress", e);
 };
 </script>
 <style scoped lang="less">

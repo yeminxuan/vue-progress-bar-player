@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 12:33:54
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-07 16:11:57
+ * @LastEditTime: 2024-03-08 10:57:46
  * @FilePath: /vue3-process-bar-player/src/components/common/example.vue
  * @Description: 
 -->
@@ -20,6 +20,7 @@
 interface Props {
   title: string;
 }
+// @ts-ignore
 const props = defineProps<Props>();
 </script>
 <style scoped lang="less">
