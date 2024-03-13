@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 10:41:37
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-08 19:16:31
+ * @LastEditTime: 2024-03-13 18:29:44
  * @FilePath: /vue3-process-bar-player/src/views/colorSplitProgressBar.vue
  * @Description: 
 -->
@@ -14,14 +14,14 @@
         ref="ColorSplitProcessBarRef"
         :data="splitProgressData"
         @handle-play="handlePlay"
-        :duration="10"
+        :duration="50"
         :is-split="true"
         :split-config="{
           splitFields: 'speed',
           inRangeColor: 'blue',
           outRangeColor: 'red',
-          outRangeBacColor: 'red',
-          inRangeBacColor: 'blue'
+          outRangeBacColor: 'rgba(255,0,0,0.3)',
+          inRangeBacColor: 'rgba(0,0,255,0.3)'
         }"
       ></ColorSplitProcessBar>
     </Example>
@@ -34,7 +34,7 @@ import Example from "@common/example.vue";
 import { ref } from "vue";
 const ColorSplitProcessBarRef = ref();
 const handlePlay = () => {
-  console.log(ColorSplitProcessBarRef.value);
+  // console.log(ColorSplitProcessBarRef.value);
 };
 </script>
 <style scoped lang="less">

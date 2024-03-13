@@ -2,8 +2,8 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2023-03-21 21:00:52
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-06 11:30:11
- * @FilePath: /vue3-process-bar-player/eslintrc.cjs
+ * @LastEditTime: 2024-03-13 19:08:47
+ * @FilePath: /vue3-process-bar-player/.eslintrc.cjs
  * @Description: eslint规则
  */
 module.exports = {
@@ -39,5 +39,6 @@ module.exports = {
     "@typescript-eslint/ban-types": 0, //此规则禁止特定类型，并可以建议替代方案。请注意，它不会禁止使用相应的运行时对象。
     "@typescript-eslint/ban-ts-comment": 0,
     "vue/no-mutating-props": 0,
+    "vue/multi-word-component-names": 0,
   },
 };
