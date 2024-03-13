@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 10:41:37
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-13 18:29:44
+ * @LastEditTime: 2024-03-13 19:32:03
  * @FilePath: /vue3-process-bar-player/src/views/colorSplitProgressBar.vue
  * @Description: 
 -->
@@ -21,7 +21,12 @@
           inRangeColor: 'blue',
           outRangeColor: 'red',
           outRangeBacColor: 'rgba(255,0,0,0.3)',
-          inRangeBacColor: 'rgba(0,0,255,0.3)'
+          inRangeBacColor: 'rgba(0,0,255,0.3)',
+        }"
+        :speed-config="{
+          speed: splitTrackSpeed,
+          uppperSpeed: uppperSpeed,
+          nextSpeed: prevSpeed,
         }"
       ></ColorSplitProcessBar>
     </Example>
@@ -31,11 +36,27 @@
 import { splitProgressData } from "@/assets/data";
 import ColorSplitProcessBar from "@packages/colorSplitProgressBar/index.vue";
 import Example from "@common/example.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 const ColorSplitProcessBarRef = ref();
 const handlePlay = () => {
   // console.log(ColorSplitProcessBarRef.value);
 };
+const splitTrackSpeed = ref(null);
+const uppperSpeed = ref(0);
+const prevSpeed = computed(() => {
+  if (splitTrackSpeed != null) {
+    return Number((Number(splitTrackSpeed.value) - 0.5).toFixed(2));
+  } else {
+    return -0.5;
+  }
+});
+const nextSpeed = computed(() => {
+  if (splitTrackSpeed != null) {
+    return Number((Number(splitTrackSpeed.value) + 0.5).toFixed(2));
+  } else {
+    return 0.5;
+  }
+});
 </script>
 <style scoped lang="less">
 #colorSplitProcessBar {

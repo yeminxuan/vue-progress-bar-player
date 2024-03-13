@@ -2,29 +2,20 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-06 19:06:46
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-13 19:04:31
+ * @LastEditTime: 2024-03-13 19:33:07
  * @FilePath: /vue3-process-bar-player/src/packages/colorSplitProgressBar/index.vue
  * @Description: 
 -->
 <template>
   <div class="color-split-progress-bar">
-    <div
-      class="controlBtn"
-      @click="play(isPlay)"
-    >
-      <i
-        v-if="!isPlay"
-        class="iconfont icon-bofang"
-      />
-      <i
-        v-if="isPlay"
-        class="iconfont icon-zanting"
-      />
+    <div class="controlBtn" @click="play(isPlay)">
+      <i v-if="!isPlay" class="iconfont icon-bofang" />
+      <i v-if="isPlay" class="iconfont icon-zanting" />
     </div>
     <div
       class="color-split-progress-bar-bac"
       :style="{
-        background: `url(${bacSvgUrl})`,
+        background: isSplit ? `url(${bacSvgUrl})` : '#ccc',
       }"
       @mousedown.stop="changeSlider($event)"
     >
@@ -34,10 +25,10 @@
           pause: isPlay == false,
           refresh: refreshClick == false,
         }"
-        class="color-split-progress-bar-fill" 
+        class="color-split-progress-bar-fill"
         :style="{
           width: procentage + '%',
-          background: isSplit && fillColor ? fillColor : '#409eff',
+          background: isSplit ? 'none' : '#409eff',
         }"
       >
         <img
@@ -46,13 +37,10 @@
           alt=""
           width="100%"
           height="30"
-        >
+        />
       </div>
     </div>
-    <div
-      class="refresh"
-      @click="refresh"
-    >
+    <div class="refresh" @click="refresh">
       <i class="iconfont icon-zhongzhi" />
     </div>
   </div>
@@ -71,17 +59,21 @@ interface SplitConfig {
   outRangeBacColor: string;
   inRangeBacColor: string;
 }
+interface SpeedConfig {
+  speed: number | null;
+  uppperSpeed: number;
+  nextSpeed: number;
+}
 interface Props {
   data: any;
   duration: number;
-  fillColor?: string;
   isSplit?: boolean;
   splitConfig?: SplitConfig;
+  speedConfig?: SpeedConfig;
 }
 const props = withDefaults(defineProps<Props>(), {
   data: () => [],
   duration: 50,
-  fillColor: "none",
   isSplit: false,
   splitConfig: () => ({
     splitFields: "",
