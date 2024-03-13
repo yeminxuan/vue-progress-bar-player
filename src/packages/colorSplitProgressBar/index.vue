@@ -7,17 +7,28 @@
  * @Description: 
 -->
 <template>
-  <div class="color-split-progress-bar">
-    <div class="controlBtn" @click="play(isPlay)">
-      <i v-if="!isPlay" class="iconfont icon-bofang" />
-      <i v-if="isPlay" class="iconfont icon-zanting" />
+  <div
+    class="color-split-progress-bar"
+    @mousedown.stop="changeSlider($event)"
+  >
+    <div
+      class="controlBtn"
+      @click="play(isPlay)"
+    >
+      <i
+        v-if="!isPlay"
+        class="iconfont icon-bofang"
+      />
+      <i
+        v-if="isPlay"
+        class="iconfont icon-zanting"
+      />
     </div>
     <div
       class="color-split-progress-bar-bac"
       :style="{
         background: isSplit ? `url(${bacSvgUrl})` : '#ccc',
       }"
-      @mousedown.stop="changeSlider($event)"
     >
       <div
         :class="{
@@ -37,10 +48,13 @@
           alt=""
           width="100%"
           height="30"
-        />
+        >
       </div>
     </div>
-    <div class="refresh" @click="refresh">
+    <div
+      class="refresh"
+      @click="refresh"
+    >
       <i class="iconfont icon-zhongzhi" />
     </div>
   </div>
@@ -93,7 +107,7 @@ const emits = defineEmits<{
   (e: "skipProgress", event: any): void;
   (e: "handlePlay"): void;
 }>();
-const width = ref(0)
+const width = ref(0);
 const widthValues: Ref<any[]> = ref([]);
 const computedWidth = () => {
   widthValues.value = Array.from({ length: props.data.length }, (_, i) => {
@@ -162,7 +176,7 @@ const play = (status: boolean) => {
   }
 };
 const refresh = () => {
-  emits('refresh')
+  emits('refresh');
   refreshClick.value = false;
   clearInterval(progressTimer.value);
   progressTimer.value = null;
@@ -170,22 +184,35 @@ const refresh = () => {
   dataIndex.value = -1;
   isPlay.value = false;
 };
-const changeSlider = (event: MouseEvent) => {
-
-  let offsetX = event.pageX- document.getElementsByClassName("color-split-progress-bar-bac")[0].getBoundingClientRect().x
-  let currentPercentage = (offsetX / width.value) * 100
-  console.log(widthValues.value);
-  
-  let closest = { percentage: -1, index: -1 }
-  widthValues.value.forEach((item:any,index:number) => {
-    if(item.procentage <= currentPercentage) {
-      let distance = Math.abs(item.procentage - currentPercentage);
-      if (distance < Math.abs(closest.percentage - currentPercentage) || closest.percentage < 0) {
-        closest = { percentage: item.procentage, index: index };
+const changeSlider = (e: MouseEvent) => {
+  console.log(e);
+  let closest = { percentage: -1, index: -1 };
+  document.onmousemove = (event) => {
+    let offsetX = event.pageX- document.getElementsByClassName("color-split-progress-bar-bac")[0].getBoundingClientRect().x;
+    let currentProcentage = (offsetX / width.value) * 100;
+    widthValues.value.forEach((item:any,index:number) => {
+      if(item.procentage <= currentProcentage) {
+        let distance = Math.abs(item.procentage - currentProcentage);
+        if (distance < Math.abs(closest.percentage - currentProcentage) || closest.percentage < 0) {
+          closest = { percentage: item.procentage, index: index };
+        }
       }
-    }
-  })
-  procentage.value = closest.percentage
+    });
+    console.log(closest);
+    dataIndex.value = closest.index;
+    procentage.value = closest.percentage;
+    refreshClick.value = false;
+    clearInterval(progressTimer.value);
+    progressTimer.value = null;
+    isPlay.value = false;
+  };
+  document.onmouseup = (e) => {
+    document.onmousemove = null;
+    document.onmouseup = null;
+  };
+  
+
+  
 };
 const addRange = (
   result: any,
@@ -423,8 +450,8 @@ const splitFun = () => {
 onMounted(() => {
   nextTick(() => {
     const dom = document.getElementsByClassName("color-split-progress-bar-bac");
-    width.value = dom[0].clientWidth 
-  })
+    width.value = dom[0].clientWidth; 
+  });
   computedWidth();
   splitFun();
 });
@@ -452,6 +479,7 @@ onMounted(() => {
     height: 100%;
     border-radius: 5px;
     overflow: hidden;
+    cursor: pointer;
     .play {
       transition: width 0.2s linear;
     }
@@ -464,6 +492,7 @@ onMounted(() => {
       will-change: transition;
       transition: width 0.2s linear;
       border: none;
+      user-select: none;
     }
     .refresh {
       transition: none;
