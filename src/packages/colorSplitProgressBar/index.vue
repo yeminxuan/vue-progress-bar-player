@@ -9,7 +9,6 @@
 <template>
   <div
     class="color-split-progress-bar"
-    @mousedown.stop="changeSlider($event)"
   >
     <div
       class="controlBtn"
@@ -29,6 +28,7 @@
       :style="{
         background: isSplit ? `url(${bacSvgUrl})` : '#ccc',
       }"
+      @mousedown.stop="changeSlider($event)"
     >
       <div
         :class="{
@@ -145,7 +145,7 @@ const updateProgress = () => {
     dataIndex.value++;
     if (targetWidth >= 100) {
       // If the progress bar ends playing
-      dataIndex.value = 100;
+      procentage.value = 100;
       clearInterval(progressTimer.value);
       progressTimer.value = null;
       isPlay.value = false;
@@ -185,34 +185,43 @@ const refresh = () => {
   isPlay.value = false;
 };
 const changeSlider = (e: MouseEvent) => {
-  console.log(e);
-  let closest = { percentage: -1, index: -1 };
+  computedOffsetX(e);
+    
   document.onmousemove = (event) => {
-    let offsetX = event.pageX- document.getElementsByClassName("color-split-progress-bar-bac")[0].getBoundingClientRect().x;
-    let currentProcentage = (offsetX / width.value) * 100;
-    widthValues.value.forEach((item:any,index:number) => {
-      if(item.procentage <= currentProcentage) {
-        let distance = Math.abs(item.procentage - currentProcentage);
-        if (distance < Math.abs(closest.percentage - currentProcentage) || closest.percentage < 0) {
-          closest = { percentage: item.procentage, index: index };
-        }
-      }
-    });
-    console.log(closest);
-    dataIndex.value = closest.index;
-    procentage.value = closest.percentage;
-    refreshClick.value = false;
-    clearInterval(progressTimer.value);
-    progressTimer.value = null;
-    isPlay.value = false;
+    computedOffsetX(event);
+   
   };
-  document.onmouseup = (e) => {
+  document.onmouseup = (event) => {
+    
+    computedOffsetX(event);
     document.onmousemove = null;
     document.onmouseup = null;
+
   };
   
 
   
+};
+const computedOffsetX = (event:MouseEvent) => {
+  let closest = { percentage: -1, index: -1 };
+  let offsetX = event.pageX- document.getElementsByClassName("color-split-progress-bar-bac")[0].getBoundingClientRect().x;
+  let currentProcentage = (offsetX / width.value) * 100;
+  widthValues.value.forEach((item:any,index:number) => {
+    if(item.procentage <= currentProcentage) {
+      let distance = Math.abs(item.procentage - currentProcentage);
+      if (distance < Math.abs(closest.percentage - currentProcentage) || closest.percentage < 0) {
+        closest = { percentage: item.procentage, index: index };
+      }
+    }
+  });
+  console.log(closest);
+    
+  dataIndex.value = closest.index;
+  procentage.value = closest.percentage;
+  refreshClick.value = false;
+  clearInterval(progressTimer.value);
+  progressTimer.value = null;
+  isPlay.value = false;
 };
 const addRange = (
   result: any,
@@ -480,6 +489,7 @@ onMounted(() => {
     border-radius: 5px;
     overflow: hidden;
     cursor: pointer;
+    user-select: none;
     .play {
       transition: width 0.2s linear;
     }
@@ -493,6 +503,7 @@ onMounted(() => {
       transition: width 0.2s linear;
       border: none;
       user-select: none;
+      pointer-events: none;
     }
     .refresh {
       transition: none;

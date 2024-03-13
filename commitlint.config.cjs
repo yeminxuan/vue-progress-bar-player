@@ -73,7 +73,7 @@ module.exports = {
         upperCaseSubject: false,
         markBreakingChangeMode: false,
         allowBreakingChanges: ['feat', 'fix'],
-        breaklineNumber: 100,
+        breaklineNumber: 500,
         breaklineChar: '|',
         skipQuestions: [],
         issuePrefixes: [{ value: 'closed', name: 'closed:   ISSUES has been processed' }],
