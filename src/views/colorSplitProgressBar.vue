@@ -57,6 +57,9 @@ const nextSpeed = computed(() => {
     return 0.5;
   }
 });
+const skipProgress = (event: MouseEvent)  => {
+
+}
 </script>
 <style scoped lang="less">
 #colorSplitProcessBar {

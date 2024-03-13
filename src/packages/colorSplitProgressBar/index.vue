@@ -46,7 +46,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from "vue";
+import { nextTick, onMounted, ref, watchEffect } from "vue";
 import type { Ref } from "vue";
 interface SplitConfig {
   splitFields: string;
@@ -77,10 +77,10 @@ const props = withDefaults(defineProps<Props>(), {
   isSplit: false,
   splitConfig: () => ({
     splitFields: "",
-    inRangeColor: "red",
-    outRangeColor: "green",
-    outRangeBacColor: "rgba(255,255,0,0.2)",
-    inRangeBacColor: "rgba(0,0,255,0.2)",
+    inRangeColor: "",
+    outRangeColor: "",
+    outRangeBacColor: "",
+    inRangeBacColor: "",
     position: {
       x: 0,
       y: 0,
@@ -88,9 +88,12 @@ const props = withDefaults(defineProps<Props>(), {
   }),
 });
 const emits = defineEmits<{
+  (e: 'refresh'):void;
+  (e: 'play'):void;
   (e: "skipProgress", event: any): void;
   (e: "handlePlay"): void;
 }>();
+const width = ref(0)
 const widthValues: Ref<any[]> = ref([]);
 const computedWidth = () => {
   widthValues.value = Array.from({ length: props.data.length }, (_, i) => {
@@ -108,6 +111,7 @@ const getCurrentIndex = () => {
 defineExpose({
   getCurrentIndex,
   widthValues,
+  width
 });
 //Percentage of progress bar
 const procentage = ref(0);
@@ -158,6 +162,7 @@ const play = (status: boolean) => {
   }
 };
 const refresh = () => {
+  emits('refresh')
   refreshClick.value = false;
   clearInterval(progressTimer.value);
   progressTimer.value = null;
@@ -165,8 +170,22 @@ const refresh = () => {
   dataIndex.value = -1;
   isPlay.value = false;
 };
-const changeSlider = (e: Event) => {
-  emits("skipProgress", e);
+const changeSlider = (event: MouseEvent) => {
+
+  let offsetX = event.pageX- document.getElementsByClassName("color-split-progress-bar-bac")[0].getBoundingClientRect().x
+  let currentPercentage = (offsetX / width.value) * 100
+  console.log(widthValues.value);
+  
+  let closest = { percentage: -1, index: -1 }
+  widthValues.value.forEach((item:any,index:number) => {
+    if(item.procentage <= currentPercentage) {
+      let distance = Math.abs(item.procentage - currentPercentage);
+      if (distance < Math.abs(closest.percentage - currentPercentage) || closest.percentage < 0) {
+        closest = { percentage: item.procentage, index: index };
+      }
+    }
+  })
+  procentage.value = closest.percentage
 };
 const addRange = (
   result: any,
@@ -401,36 +420,11 @@ const splitFun = () => {
   bacSvgUrl.value = bacSvgHref;
   splitSvgUrl.value = newFillSvgHref;
 };
-const isBetweenRange = (result: any, currentArray: any): boolean => {
-  let prevRangeSpeed = null;
-  let currentRangeSpeed = null;
-  if (result.length == 1) {
-    prevRangeSpeed =
-      result[result.length - 1][result[result.length - 1].length - 1].speed;
-  } else if (result.length > 1) {
-    prevRangeSpeed =
-      result[result.length - 2][result[result.length - 2].length - 1].speed;
-  }
-  currentRangeSpeed = currentArray[currentArray.length - 1].speed;
-  if (
-    prevRangeSpeed >= splitTrackSpeed &&
-    prevRangeSpeed <= splitTrackSpeed + 0.5 &&
-    currentRangeSpeed >= splitTrackSpeed &&
-    currentRangeSpeed <= splitTrackSpeed + 0.5
-  ) {
-    return true;
-  } else if (
-    (prevRangeSpeed < splitTrackSpeed ||
-      prevRangeSpeed > splitTrackSpeed + 0.5) &&
-    (currentRangeSpeed < splitTrackSpeed ||
-      currentRangeSpeed > splitTrackSpeed + 0.5)
-  ) {
-    return true;
-  } else {
-    return false;
-  }
-};
 onMounted(() => {
+  nextTick(() => {
+    const dom = document.getElementsByClassName("color-split-progress-bar-bac");
+    width.value = dom[0].clientWidth 
+  })
   computedWidth();
   splitFun();
 });
