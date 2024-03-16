@@ -2,25 +2,23 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-06 19:06:46
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-13 19:33:07
+ * @LastEditTime: 2024-03-16 18:31:58
  * @FilePath: /vue3-process-bar-player/src/packages/colorSplitProgressBar/index.vue
  * @Description: 
 -->
 <template>
-  <div
-    class="color-split-progress-bar"
-  >
-    <div
-      class="controlBtn"
-      @click="play(isPlay)"
-    >
+  <div class="color-split-progress-bar">
+    <div class="controlBtn">
       <i
-        v-if="!isPlay"
+        v-if="!isPlay && procentage < 100"
         class="iconfont icon-bofang"
+        @click="play"
       />
+      <i v-if="isPlay" class="iconfont icon-zanting" @click="pause" />
       <i
-        v-if="isPlay"
-        class="iconfont icon-zanting"
+        v-if="!refreshClick && procentage == 100"
+        class="iconfont icon-zhongzhi"
+        @click="refresh"
       />
     </div>
     <div
@@ -33,7 +31,6 @@
       <div
         :class="{
           play: isPlay == true,
-          pause: isPlay == false,
           refresh: refreshClick == false,
         }"
         class="color-split-progress-bar-fill"
@@ -48,13 +45,10 @@
           alt=""
           width="100%"
           height="30"
-        >
+        />
       </div>
     </div>
-    <div
-      class="refresh"
-      @click="refresh"
-    >
+    <div class="refresh" @click="refresh">
       <i class="iconfont icon-zhongzhi" />
     </div>
   </div>
@@ -102,8 +96,8 @@ const props = withDefaults(defineProps<Props>(), {
   }),
 });
 const emits = defineEmits<{
-  (e: 'refresh'):void;
-  (e: 'play'):void;
+  (e: "refresh"): void;
+  (e: "play"): void;
   (e: "skipProgress", event: any): void;
   (e: "handlePlay"): void;
 }>();
@@ -125,103 +119,132 @@ const getCurrentIndex = () => {
 defineExpose({
   getCurrentIndex,
   widthValues,
-  width
+  width,
 });
 //Percentage of progress bar
 const procentage = ref(0);
 //Whether the player is playing
 const isPlay = ref(false);
+// The width of the progress already filled
+const fillWidth = ref(0);
 const progressTimer = ref(null) as any;
 const refreshClick = ref(false);
 const dataIndex = ref(0);
 const updateProgress = () => {
-  if (dataIndex.value < props.data.length) {
-    emits("handlePlay");
-    // 设置目标宽度
-    const targetWidth =
-      dataIndex.value == -1 ? 0 : widthValues.value[dataIndex.value].procentage;
-    //Change the progress bar percentage
-    procentage.value = targetWidth;
-    dataIndex.value++;
-    if (targetWidth >= 100) {
-      // If the progress bar ends playing
-      procentage.value = 100;
-      clearInterval(progressTimer.value);
-      progressTimer.value = null;
-      isPlay.value = false;
-    }
-  } else {
-    return;
-  }
-};
-const animateProgress = () => {
   requestAnimationFrame(() => {
-    updateProgress();
+    if (dataIndex.value < props.data.length) {
+      emits("handlePlay");
+      // 设置目标宽度
+      const targetWidth = widthValues.value[dataIndex.value].procentage;
+      //Change the progress bar percentage
+      procentage.value = targetWidth;
+      dataIndex.value++;
+      if (targetWidth >= 100) {
+        // If the progress bar ends playing
+        procentage.value = 100;
+        clearInterval(progressTimer.value);
+        progressTimer.value = null;
+        setTimeout(() => {
+          isPlay.value = false;
+          refreshClick.value = false;
+        }, props.duration);
+      }
+    } else {
+      return;
+    }
   });
 };
-const play = (status: boolean) => {
+const play = () => {
+  isPlay.value = true;
+  let targetWidth = widthValues.value[dataIndex.value].procentage;
+  //Change the progress bar percentage
+  procentage.value = targetWidth;
+  dataIndex.value++;
   refreshClick.value = true;
-  isPlay.value = !status;
-  if (isPlay.value) {
-    if (procentage.value == 100) {
-      refreshClick.value = false;
-      dataIndex.value = -1;
-      procentage.value - 0;
-    }
-    progressTimer.value = setInterval(animateProgress, props.duration);
-  } else {
-    clearInterval(progressTimer.value);
-    progressTimer.value = null;
-    isPlay.value = false;
+  if (procentage.value == 100) {
+    refreshClick.value = false;
   }
+  progressTimer.value = setInterval(updateProgress, props.duration);
+};
+const pause = () => {
+  fillWidth.value = document.getElementsByClassName(
+    "color-split-progress-bar-fill"
+  )[0].clientWidth;
+  computedPauseOffsetX();
+  clearInterval(progressTimer.value);
+  progressTimer.value = null;
+  isPlay.value = false;
 };
 const refresh = () => {
-  emits('refresh');
-  refreshClick.value = false;
+  emits("refresh");
   clearInterval(progressTimer.value);
   progressTimer.value = null;
   procentage.value = 0;
-  dataIndex.value = -1;
+  dataIndex.value = 0;
   isPlay.value = false;
+  //replay in 100 milliseconds later
+  setTimeout(() => {
+    play();
+  }, 100);
 };
 const changeSlider = (e: MouseEvent) => {
   computedOffsetX(e);
-    
+
   document.onmousemove = (event) => {
     computedOffsetX(event);
-   
   };
   document.onmouseup = (event) => {
-    
     computedOffsetX(event);
     document.onmousemove = null;
     document.onmouseup = null;
-
   };
-  
-
-  
 };
-const computedOffsetX = (event:MouseEvent) => {
-  let closest = { percentage: -1, index: -1 };
-  let offsetX = event.pageX- document.getElementsByClassName("color-split-progress-bar-bac")[0].getBoundingClientRect().x;
+const computedOffsetX = (event: MouseEvent) => {
+  let closest = { percentage: -1, index: 0 };
+  let offsetX =
+    event.pageX -
+    document
+      .getElementsByClassName("color-split-progress-bar-bac")[0]
+      .getBoundingClientRect().x;
   let currentProcentage = (offsetX / width.value) * 100;
-  widthValues.value.forEach((item:any,index:number) => {
-    if(item.procentage <= currentProcentage) {
+  widthValues.value.forEach((item: any, index: number) => {
+    if (item.procentage <= currentProcentage) {
       let distance = Math.abs(item.procentage - currentProcentage);
-      if (distance < Math.abs(closest.percentage - currentProcentage) || closest.percentage < 0) {
+      if (
+        distance < Math.abs(closest.percentage - currentProcentage) ||
+        closest.percentage < 0
+      ) {
         closest = { percentage: item.procentage, index: index };
       }
     }
   });
-  console.log(closest);
-    
   dataIndex.value = closest.index;
-  procentage.value = closest.percentage;
+  procentage.value = currentProcentage;
   refreshClick.value = false;
   clearInterval(progressTimer.value);
   progressTimer.value = null;
   isPlay.value = false;
+};
+const computedPauseOffsetX = () => {
+  /**
+   * @Description: Calculates the actual dataIndex and progress bar percentage at pause
+   */
+  let closest = { percentage: -1, index: 0 };
+  let offsetX = fillWidth.value;
+  let currentProcentage = (offsetX / width.value) * 100;
+  widthValues.value.forEach((item: any, index: number) => {
+    if (item.procentage <= currentProcentage) {
+      let distance = Math.abs(item.procentage - currentProcentage);
+      if (
+        distance < Math.abs(closest.percentage - currentProcentage) ||
+        closest.percentage < 0
+      ) {
+        closest = { percentage: item.procentage, index: index };
+      }
+    }
+  });
+  dataIndex.value = closest.index;
+  procentage.value = currentProcentage;
 };
 const addRange = (
   result: any,
@@ -257,7 +280,6 @@ const addRange = (
         result[result.length - 2][result[result.length - 2].length - 1]
           .dataIndex
     ).width;
-
     x = prevLastWidth;
     width = currentWidth - prevLastWidth;
   }
@@ -332,7 +354,7 @@ const splitFun = () => {
         );
         currentArray = [];
       }
-      continue;
+      break;
     }
 
     /* Compare the previous number to determine the interval
@@ -340,7 +362,6 @@ const splitFun = () => {
      */
     // If the previous number is in the [0.5,1] interval and the current number is greater than 1
     if (
-      i > 0 &&
       props.data[i][props.splitConfig.splitFields] >= splitTrackSpeed &&
       props.data[i][props.splitConfig.splitFields] <= splitTrackSpeed + 0.5 &&
       props.data[i + 1][props.splitConfig.splitFields] > splitTrackSpeed + 0.5
@@ -443,6 +464,8 @@ const splitFun = () => {
       currentArray = [];
     }
   }
+  console.log(result);
+
   // Convert SVG elements to XML strings
   const newBacSvg = new XMLSerializer().serializeToString(bacSvg);
   const newFillSvg = new XMLSerializer().serializeToString(svg);
@@ -459,7 +482,7 @@ const splitFun = () => {
 onMounted(() => {
   nextTick(() => {
     const dom = document.getElementsByClassName("color-split-progress-bar-bac");
-    width.value = dom[0].clientWidth; 
+    width.value = dom[0].clientWidth;
   });
   computedWidth();
   splitFun();
@@ -491,16 +514,13 @@ onMounted(() => {
     cursor: pointer;
     user-select: none;
     .play {
-      transition: width 0.2s linear;
-    }
-    .pause {
-      animation-play-state: paused;
+      transition: width 1s linear;
     }
     .color-split-progress-bar-fill {
       height: 100%;
       border-radius: 5px;
       will-change: transition;
-      transition: width 0.2s linear;
+      transition: width 1s linear;
       border: none;
       user-select: none;
       pointer-events: none;

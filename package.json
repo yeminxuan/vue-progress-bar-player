@@ -36,6 +36,7 @@
     ]
   },
   "dependencies": {
+    "@vueuse/core": "^10.9.0",
     "vue": "^3.4.19",
     "vue-router": "4"
   },
