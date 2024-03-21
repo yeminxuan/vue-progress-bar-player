@@ -2,7 +2,6 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-06 19:06:46
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-16 18:31:58
  * @FilePath: /vue3-process-bar-player/src/packages/colorSplitProgressBar/index.vue
  * @Description: 
 -->
@@ -104,14 +103,17 @@ const emits = defineEmits<{
 const width = ref(0);
 const widthValues: Ref<any[]> = ref([]);
 const computedWidth = () => {
-  widthValues.value = Array.from({ length: props.data.length }, (_, i) => {
+  let arr: any = [];
+  for (let i = 0; i < props.data.length; i++) {
     const dom = document.getElementsByClassName("color-split-progress-bar-bac");
-    return {
-      procentage: ((i + 1) * 100) / props.data.length,
+    let obj = {
+      procentage: (i * 100) / (props.data.length - 1),
       index: i,
-      width: dom[0].clientWidth * ((i + 1) / props.data.length),
+      width: (dom[0].clientWidth * i) / (props.data.length - 1),
     };
-  });
+    arr.push(obj);
+  }
+  widthValues.value = arr;
 };
 const getCurrentIndex = () => {
   return Math.floor(props.data.length * (procentage.value / 100));
@@ -133,10 +135,8 @@ const dataIndex = ref(0);
 const updateProgress = () => {
   requestAnimationFrame(() => {
     if (dataIndex.value < props.data.length) {
-      emits("handlePlay");
-      // 设置目标宽度
-      const targetWidth = widthValues.value[dataIndex.value].procentage;
-      //Change the progress bar percentage
+      //set target width
+      const targetWidth = widthValues.value[dataIndex.value + 1].procentage;
       procentage.value = targetWidth;
       dataIndex.value++;
       if (targetWidth >= 100) {
@@ -156,7 +156,7 @@ const updateProgress = () => {
 };
 const play = () => {
   isPlay.value = true;
-  let targetWidth = widthValues.value[dataIndex.value].procentage;
+  let targetWidth = widthValues.value[dataIndex.value + 1].procentage;
   //Change the progress bar percentage
   procentage.value = targetWidth;
   dataIndex.value++;
@@ -309,7 +309,9 @@ const splitFun = () => {
   bacSvg.setAttribute("width", "100%");
   bacSvg.setAttribute("height", "30px");
   for (let i = 0; i < props.data.length; i++) {
-    currentArray.push({ ...props.data[i], dataIndex: i });
+    if (i != 0) {
+      currentArray.push({ ...props.data[i], dataIndex: i });
+    }
     /* when the loop reaches the last element */
     if (i == props.data.length - 1) {
       if (

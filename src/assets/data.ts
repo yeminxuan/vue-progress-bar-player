@@ -28,7 +28,13 @@ let splitProgressData = [
     lng: 76.528542,
     lat: 39.378684,
   },
-  
+   {
+    id: 746367,
+    gpstime: "2023-11-12T00:09:57",
+    speed: 1.8,
+    lng: 76.528542,
+    lat: 39.378684,
+  },
   
 ];
 export { splitProgressData };
