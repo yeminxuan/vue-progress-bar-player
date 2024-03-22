@@ -238,6 +238,9 @@ const computedOffsetX = (event: MouseEvent) => {
       .getElementsByClassName("color-split-progress-bar-bac")[0]
       .getBoundingClientRect().x;
   let currentProcentage = (offsetX / width.value) * 100;
+  if(currentProcentage <= 0) {
+    currentProcentage = 0;
+  }
   widthValues.value.forEach((item: any, index: number) => {
     if (item.procentage <= currentProcentage) {
       let distance = Math.abs(item.procentage - currentProcentage);
