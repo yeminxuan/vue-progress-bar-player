@@ -170,14 +170,23 @@ const play = () => {
   procentage.value = targetWidth;
   dataIndex.value++;
   refreshClick.value = true;
-  if (procentage.value == 100) {
-    refreshClick.value = false;
-  }
+
   if (remainingTime.value == -1) {
     clearInterval(progressTimer.value);
     progressTimer.value = null;
     progressTimer.value = setInterval(updateProgress, props.duration);
+    if (procentage.value == 100) {
+      isPlay.value = false;
+      refreshClick.value = false;
+    }
   } else {
+    if (dataIndex.value == props.data.length - 1) {
+      setTimeout(() => {
+        isPlay.value = false;
+        refreshClick.value = false;
+      }, remainingTime.value);
+      return;
+    }
     setTimeout(() => {
       const targetWidth = widthValues.value[dataIndex.value + 1].procentage;
       procentage.value = targetWidth;
@@ -207,7 +216,7 @@ const refresh = () => {
   dataIndex.value = 0;
   isPlay.value = false;
   stagedIndex.value = 0;
-  emits('handlePlay',stagedIndex.value);
+  emits("handlePlay", stagedIndex.value);
   remainingTime.value = -1;
   //replay in 100 milliseconds later
   setTimeout(() => {
@@ -238,7 +247,7 @@ const computedOffsetX = (event: MouseEvent) => {
       .getElementsByClassName("color-split-progress-bar-bac")[0]
       .getBoundingClientRect().x;
   let currentProcentage = (offsetX / width.value) * 100;
-  if(currentProcentage <= 0) {
+  if (currentProcentage <= 0) {
     currentProcentage = 0;
   }
   widthValues.value.forEach((item: any, index: number) => {
@@ -560,7 +569,7 @@ const executeAfterApproximatelyOneSecond = (
 watch(
   () => [procentage.value, isPlay.value, remainingTime.value],
   (n, o: any) => {
-    if (n[2] != -1) {
+    if (n[2] != -1 && n[0] != o[0] && n[1] == true) {
       clearTimeout(stagedIndexTimer.value);
       stagedIndexTimer.value = null;
       executeAfterApproximatelyOneSecond(() => {
@@ -582,6 +591,10 @@ watch(
             widthValues.value[stagedIndex.value + 1].procentage
           ) {
             // console.log("Normal playback");
+            if (procentage.value == 100) {
+              isPlay.value = false;
+              refreshClick.value = false;
+            }
             stagedIndex.value++;
             emits("handlePlay", stagedIndex.value);
           }
