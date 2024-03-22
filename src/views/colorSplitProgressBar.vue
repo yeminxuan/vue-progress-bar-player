@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 10:41:37
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-21 18:24:43
+ * @LastEditTime: 2024-03-22 11:34:02
  * @FilePath: /vue3-process-bar-player/src/views/colorSplitProgressBar.vue
  * @Description: 
 -->
@@ -13,8 +13,7 @@
         v-if="splitProgressData.length > 0"
         ref="ColorSplitProcessBarRef"
         :data="splitProgressData"
-        @handle-play="handlePlay"
-        :duration="5000"
+        :duration="1000"
         :is-split="true"
         :split-config="{
           splitFields: 'speed',
@@ -28,7 +27,9 @@
           uppperSpeed: uppperSpeed,
           nextSpeed: prevSpeed,
         }"
-      ></ColorSplitProcessBar>
+        @handle-play="handlePlay"
+        @skip-progress="skipProgress"
+      />
     </Example>
   </div>
 </template>
@@ -44,21 +45,21 @@ const handlePlay = (index:number) => {
 const splitTrackSpeed = ref(null);
 const uppperSpeed = ref(0);
 const prevSpeed = computed(() => {
-  if (splitTrackSpeed != null) {
+  if (splitTrackSpeed.value != null) {
     return Number((Number(splitTrackSpeed.value) - 0.5).toFixed(2));
   } else {
     return -0.5;
   }
 });
 const nextSpeed = computed(() => {
-  if (splitTrackSpeed != null) {
+  if (splitTrackSpeed.value != null) {
     return Number((Number(splitTrackSpeed.value) + 0.5).toFixed(2));
   } else {
     return 0.5;
   }
 });
-const skipProgress = (e:MouseEvent) => {
-  console.log(e);
+const skipProgress = (index:number,item:any) => {
+  console.log(index,item);
 };
 </script>
 <style scoped lang="less">

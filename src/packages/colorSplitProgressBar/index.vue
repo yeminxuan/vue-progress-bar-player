@@ -13,7 +13,11 @@
         class="iconfont icon-bofang"
         @click="play"
       />
-      <i v-if="isPlay" class="iconfont icon-zanting" @click="pause" />
+      <i
+        v-if="isPlay"
+        class="iconfont icon-zanting"
+        @click="pause"
+      />
       <i
         v-if="!refreshClick && procentage == 100"
         class="iconfont icon-zhongzhi"
@@ -37,8 +41,8 @@
           background: isSplit ? 'none' : '#409eff',
           transition: isPlay
             ? `width ${
-                remainingTime == -1 ? duration / 1000 : remainingTime / 1000
-              }s  linear`
+              remainingTime == -1 ? duration / 1000 : remainingTime / 1000
+            }s  linear`
             : ``,
         }"
       >
@@ -48,10 +52,13 @@
           alt=""
           width="100%"
           height="30"
-        />
+        >
       </div>
     </div>
-    <div class="refresh" @click="refresh">
+    <div
+      class="refresh"
+      @click="refresh"
+    >
       <i class="iconfont icon-zhongzhi" />
     </div>
   </div>
@@ -101,7 +108,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emits = defineEmits<{
   (e: "refresh"): void;
   (e: "play"): void;
-  (e: "skipProgress", event: any): void;
+  (e: "skipProgress", index: number, item: any): void;
   (e: "handlePlay", index: number): void;
 }>();
 let stagedIndex = ref(0);
@@ -217,9 +224,15 @@ const changeSlider = (e: MouseEvent) => {
 
   document.onmousemove = (event) => {
     computedOffsetX(event);
+
+    emits("skipProgress", dataIndex.value, props.data[dataIndex.value]);
   };
   document.onmouseup = (event) => {
     computedOffsetX(event);
+    fillWidth.value = document.getElementsByClassName(
+      "color-split-progress-bar-fill"
+    )[0].clientWidth;
+    computedPauseOffsetX();
     document.onmousemove = null;
     document.onmouseup = null;
   };
@@ -269,6 +282,7 @@ const computedPauseOffsetX = () => {
     }
   });
   dataIndex.value = closest.index;
+  stagedIndex.value = closest.index;
   procentage.value = currentProcentage;
   let IncompleteProgress =
     widthValues.value[dataIndex.value + 1].procentage - procentage.value;
