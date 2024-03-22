@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 10:41:37
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-21 11:20:14
+ * @LastEditTime: 2024-03-21 18:24:43
  * @FilePath: /vue3-process-bar-player/src/views/colorSplitProgressBar.vue
  * @Description: 
 -->
@@ -14,7 +14,7 @@
         ref="ColorSplitProcessBarRef"
         :data="splitProgressData"
         @handle-play="handlePlay"
-        :duration="1000"
+        :duration="5000"
         :is-split="true"
         :split-config="{
           splitFields: 'speed',
@@ -38,8 +38,8 @@ import ColorSplitProcessBar from "@packages/colorSplitProgressBar/index.vue";
 import Example from "@common/example.vue";
 import { ref, computed } from "vue";
 const ColorSplitProcessBarRef = ref();
-const handlePlay = () => {
-  // console.log(ColorSplitProcessBarRef.value.getCurrentIndex());
+const handlePlay = (index:number) => {
+  console.log(index);
 };
 const splitTrackSpeed = ref(null);
 const uppperSpeed = ref(0);
@@ -57,9 +57,9 @@ const nextSpeed = computed(() => {
     return 0.5;
   }
 });
-const skipProgress = (event: MouseEvent)  => {
-  console.log(ColorSplitProcessBarRef.value.getCurrentIndex());
-}
+const skipProgress = (e:MouseEvent) => {
+  console.log(e);
+};
 </script>
 <style scoped lang="less">
 #colorSplitProcessBar {

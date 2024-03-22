@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-13 19:04:04
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-16 18:14:41
+ * @LastEditTime: 2024-03-21 17:34:06
  * @FilePath: /vue3-process-bar-player/src/assets/data.ts
  * @Description: 
  */
@@ -35,6 +35,5 @@ let splitProgressData = [
     lng: 76.528542,
     lat: 39.378684,
   },
-  
 ];
 export { splitProgressData };

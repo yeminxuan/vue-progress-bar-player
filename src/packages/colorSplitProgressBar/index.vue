@@ -29,13 +29,17 @@
     >
       <div
         :class="{
-          play: isPlay == true,
           refresh: refreshClick == false,
         }"
         class="color-split-progress-bar-fill"
         :style="{
           width: procentage + '%',
           background: isSplit ? 'none' : '#409eff',
+          transition: isPlay
+            ? `width ${
+                remainingTime == -1 ? duration / 1000 : remainingTime / 1000
+              }s  linear`
+            : ``,
         }"
       >
         <img
@@ -53,7 +57,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watchEffect } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import type { Ref } from "vue";
 interface SplitConfig {
   splitFields: string;
@@ -98,8 +102,9 @@ const emits = defineEmits<{
   (e: "refresh"): void;
   (e: "play"): void;
   (e: "skipProgress", event: any): void;
-  (e: "handlePlay"): void;
+  (e: "handlePlay", index: number): void;
 }>();
+let stagedIndex = ref(0);
 const width = ref(0);
 const widthValues: Ref<any[]> = ref([]);
 const computedWidth = () => {
@@ -114,9 +119,11 @@ const computedWidth = () => {
     arr.push(obj);
   }
   widthValues.value = arr;
+  console.log(arr);
 };
 const getCurrentIndex = () => {
-  return Math.floor(props.data.length * (procentage.value / 100));
+  return widthValues.value.find((item) => item.procentage == procentage.value)
+    .index;
 };
 defineExpose({
   getCurrentIndex,
@@ -132,9 +139,10 @@ const fillWidth = ref(0);
 const progressTimer = ref(null) as any;
 const refreshClick = ref(false);
 const dataIndex = ref(0);
+const remainingTime = ref(-1);
 const updateProgress = () => {
   requestAnimationFrame(() => {
-    if (dataIndex.value < props.data.length) {
+    if (dataIndex.value < props.data.length - 1) {
       //set target width
       const targetWidth = widthValues.value[dataIndex.value + 1].procentage;
       procentage.value = targetWidth;
@@ -164,7 +172,21 @@ const play = () => {
   if (procentage.value == 100) {
     refreshClick.value = false;
   }
-  progressTimer.value = setInterval(updateProgress, props.duration);
+  if (remainingTime.value == -1) {
+    clearInterval(progressTimer.value);
+    progressTimer.value = null;
+    progressTimer.value = setInterval(updateProgress, props.duration);
+  } else {
+    setTimeout(() => {
+      const targetWidth = widthValues.value[dataIndex.value + 1].procentage;
+      procentage.value = targetWidth;
+      dataIndex.value++;
+      remainingTime.value = -1;
+      clearInterval(progressTimer.value);
+      progressTimer.value = null;
+      progressTimer.value = setInterval(updateProgress, props.duration);
+    }, remainingTime.value);
+  }
 };
 const pause = () => {
   fillWidth.value = document.getElementsByClassName(
@@ -174,6 +196,7 @@ const pause = () => {
   clearInterval(progressTimer.value);
   progressTimer.value = null;
   isPlay.value = false;
+  stagedIndex.value = dataIndex.value;
 };
 const refresh = () => {
   emits("refresh");
@@ -182,6 +205,8 @@ const refresh = () => {
   procentage.value = 0;
   dataIndex.value = 0;
   isPlay.value = false;
+  stagedIndex.value = 0;
+  remainingTime.value = -1;
   //replay in 100 milliseconds later
   setTimeout(() => {
     play();
@@ -245,6 +270,15 @@ const computedPauseOffsetX = () => {
   });
   dataIndex.value = closest.index;
   procentage.value = currentProcentage;
+  let IncompleteProgress =
+    widthValues.value[dataIndex.value + 1].procentage - procentage.value;
+  //Calculate the distance moved per millisecond
+  let avgDistance =
+    (widthValues.value[dataIndex.value + 1].procentage -
+      widthValues.value[dataIndex.value].procentage) /
+    props.duration;
+  // Remaining time (milliseconds)
+  remainingTime.value = IncompleteProgress / avgDistance;
 };
 const addRange = (
   result: any,
@@ -466,8 +500,6 @@ const splitFun = () => {
       currentArray = [];
     }
   }
-  console.log(result);
-
   // Convert SVG elements to XML strings
   const newBacSvg = new XMLSerializer().serializeToString(bacSvg);
   const newFillSvg = new XMLSerializer().serializeToString(svg);
@@ -481,6 +513,67 @@ const splitFun = () => {
   bacSvgUrl.value = bacSvgHref;
   splitSvgUrl.value = newFillSvgHref;
 };
+const stagedIndexTimer = ref(null) as any;
+const executeAfterApproximatelyOneSecond = (
+  callback: any,
+  remainTime?: number
+) => {
+  /**
+   * @Description: System time compensation setTimeout method
+   * Because the setTimeout event is not accurate, it must be compensated according to the system time
+   * @param {any} callback
+   */
+
+  const startTime = performance.now();
+  // Use setTimeout to delay execution
+  if (remainTime != undefined) {
+    stagedIndexTimer.value = setTimeout(() => {
+      const elapsedTime = performance.now() - startTime;
+      // Call the callback function and compensate for possible delays
+      callback(elapsedTime - remainTime);
+    }, remainTime);
+  } else {
+    stagedIndexTimer.value = setTimeout(() => {
+      const elapsedTime = performance.now() - startTime;
+      // Call the callback function and compensate for possible delays
+      callback(elapsedTime - props.duration);
+    }, props.duration);
+  }
+};
+//Listen for the current percentage progress and return the index of the current point when the target implementation animation is complete
+watch(
+  () => [procentage.value, isPlay.value, remainingTime.value],
+  (n, o: any) => {
+    if (n[2] != -1) {
+      clearTimeout(stagedIndexTimer.value);
+      stagedIndexTimer.value = null;
+      executeAfterApproximatelyOneSecond(() => {
+        if (
+          procentage.value >=
+          widthValues.value[stagedIndex.value + 1].procentage
+        ) {
+          // console.log("Suspend subsequent play");
+          stagedIndex.value++;
+          emits("handlePlay", stagedIndex.value);
+        }
+      }, n[2]);
+    } else {
+      if (n[0] != o[0] && n[1] == true) {
+        //Call the setTimeout method for system time compensation
+        executeAfterApproximatelyOneSecond(() => {
+          if (
+            procentage.value >=
+            widthValues.value[stagedIndex.value + 1].procentage
+          ) {
+            // console.log("Normal playback");
+            stagedIndex.value++;
+            emits("handlePlay", stagedIndex.value);
+          }
+        });
+      }
+    }
+  }
+);
 onMounted(() => {
   nextTick(() => {
     const dom = document.getElementsByClassName("color-split-progress-bar-bac");
@@ -515,20 +608,16 @@ onMounted(() => {
     overflow: hidden;
     cursor: pointer;
     user-select: none;
-    .play {
-      transition: width 1s linear;
-    }
     .color-split-progress-bar-fill {
       height: 100%;
       border-radius: 5px;
       will-change: transition;
-      transition: width 1s linear;
       border: none;
       user-select: none;
       pointer-events: none;
     }
     .refresh {
-      transition: none;
+      transition: width 0s linear;
     }
   }
   .refresh {
