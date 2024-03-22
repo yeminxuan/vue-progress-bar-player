@@ -51,15 +51,9 @@
           :src="splitSvgUrl"
           alt=""
           width="100%"
-          height="30"
+          height="100%"
         >
       </div>
-    </div>
-    <div
-      class="refresh"
-      @click="refresh"
-    >
-      <i class="iconfont icon-zhongzhi" />
     </div>
   </div>
 </template>
@@ -595,6 +589,16 @@ onMounted(() => {
   });
   computedWidth();
   splitFun();
+  window.addEventListener("resize", () => {
+    nextTick(() => {
+      const dom = document.getElementsByClassName(
+        "color-split-progress-bar-bac"
+      );
+      width.value = dom[0].clientWidth;
+    });
+    computedWidth();
+    splitFun();
+  });
 });
 </script>
 <style scoped lang="less">
