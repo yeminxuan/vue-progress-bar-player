@@ -207,6 +207,7 @@ const refresh = () => {
   dataIndex.value = 0;
   isPlay.value = false;
   stagedIndex.value = 0;
+  emits('handlePlay',stagedIndex.value);
   remainingTime.value = -1;
   //replay in 100 milliseconds later
   setTimeout(() => {
@@ -215,10 +216,8 @@ const refresh = () => {
 };
 const changeSlider = (e: MouseEvent) => {
   computedOffsetX(e);
-
   document.onmousemove = (event) => {
     computedOffsetX(event);
-
     emits("skipProgress", dataIndex.value, props.data[dataIndex.value]);
   };
   document.onmouseup = (event) => {
@@ -256,6 +255,10 @@ const computedOffsetX = (event: MouseEvent) => {
   clearInterval(progressTimer.value);
   progressTimer.value = null;
   isPlay.value = false;
+  if (dataIndex.value >= props.data.length - 1) {
+    procentage.value = 100;
+    refreshClick.value = false;
+  }
 };
 const computedPauseOffsetX = () => {
   /**
@@ -278,15 +281,17 @@ const computedPauseOffsetX = () => {
   dataIndex.value = closest.index;
   stagedIndex.value = closest.index;
   procentage.value = currentProcentage;
-  let IncompleteProgress =
-    widthValues.value[dataIndex.value + 1].procentage - procentage.value;
-  //Calculate the distance moved per millisecond
-  let avgDistance =
-    (widthValues.value[dataIndex.value + 1].procentage -
-      widthValues.value[dataIndex.value].procentage) /
-    props.duration;
-  // Remaining time (milliseconds)
-  remainingTime.value = IncompleteProgress / avgDistance;
+  if (dataIndex.value < props.data.length - 1) {
+    let IncompleteProgress =
+      widthValues.value[dataIndex.value + 1].procentage - procentage.value;
+    //Calculate the distance moved per millisecond
+    let avgDistance =
+      (widthValues.value[dataIndex.value + 1].procentage -
+        widthValues.value[dataIndex.value].procentage) /
+      props.duration;
+    // Remaining time (milliseconds)
+    remainingTime.value = IncompleteProgress / avgDistance;
+  }
 };
 const addRange = (
   result: any,
