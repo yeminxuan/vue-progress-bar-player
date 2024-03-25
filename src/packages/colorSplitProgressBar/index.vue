@@ -71,32 +71,35 @@ interface SplitConfig {
   outRangeBacColor: string;
   inRangeBacColor: string;
 }
-interface SpeedConfig {
-  speed: number | null;
-  uppperSpeed: number;
-  nextSpeed: number;
+interface SplitFieldsConfig {
+  max: number;
+  min: number;
 }
 interface Props {
   data: any;
   duration: number;
   isSplit?: boolean;
   splitConfig?: SplitConfig;
-  speedConfig?: SpeedConfig;
+  splitFieldsConfig?: SplitFieldsConfig;
 }
 const props = withDefaults(defineProps<Props>(), {
   data: () => [],
-  duration: 50,
+  duration: 1000,
   isSplit: false,
   splitConfig: () => ({
     splitFields: "",
-    inRangeColor: "",
-    outRangeColor: "",
-    outRangeBacColor: "",
-    inRangeBacColor: "",
+    inRangeColor: "red",
+    outRangeColor: "red",
+    outRangeBacColor: "rgba(255,0,0,0.3)",
+    inRangeBacColor: "rgba(0,0,255,0.3)",
     position: {
       x: 0,
       y: 0,
     },
+  }),
+  splitFieldsConfig: () => ({
+    max: 0,
+    min: 0,
   }),
 });
 const emits = defineEmits<{
@@ -110,6 +113,11 @@ const width = ref(0);
 const widthValues: Ref<any[]> = ref([]);
 const computedWidth = () => {
   let arr: any = [];
+  if (props.data.length < 2) {
+    throw Error(
+      "data.length less than 2,Please pass in data for more than 1 attributes!"
+    );
+  }
   for (let i = 0; i < props.data.length; i++) {
     const dom = document.getElementsByClassName("color-split-progress-bar-bac");
     let obj = {
@@ -120,17 +128,8 @@ const computedWidth = () => {
     arr.push(obj);
   }
   widthValues.value = arr;
-  console.log(arr);
 };
-const getCurrentIndex = () => {
-  return widthValues.value.find((item) => item.procentage == procentage.value)
-    .index;
-};
-defineExpose({
-  getCurrentIndex,
-  widthValues,
-  width,
-});
+
 //Percentage of progress bar
 const procentage = ref(0);
 //Whether the player is playing
@@ -141,6 +140,30 @@ const progressTimer = ref(null) as any;
 const refreshClick = ref(false);
 const dataIndex = ref(0);
 const remainingTime = ref(-1);
+const splitTrackSpeed = 0.5;
+const splitSvgUrl = ref("");
+const bacSvgUrl = ref("");
+const stagedIndexTimer = ref(null) as any;
+const initProgressBar = () => {
+  setTimeout(() => {
+    dataIndex.value = 0;
+    stagedIndex.value = 0;
+    splitSvgUrl.value = "";
+    bacSvgUrl.value = "";
+    remainingTime.value = -1;
+    procentage.value = 0;
+    isPlay.value = false;
+    refreshClick.value = false;
+    nextTick(() => {
+      const dom = document.getElementsByClassName(
+        "color-split-progress-bar-bac"
+      );
+      width.value = dom[0].clientWidth;
+    });
+    computedWidth();
+    splitFun();
+  }, 5);
+};
 const updateProgress = () => {
   requestAnimationFrame(() => {
     if (dataIndex.value < props.data.length - 1) {
@@ -357,9 +380,7 @@ const addRange = (
   svg.appendChild(fillRect);
   bacSvg.appendChild(rect);
 };
-const splitTrackSpeed = 0.5;
-const splitSvgUrl = ref("");
-const bacSvgUrl = ref("");
+
 const splitFun = () => {
   let result: any = [];
   let currentArray: any = [];
@@ -375,7 +396,7 @@ const splitFun = () => {
     if (i == props.data.length - 1) {
       if (
         props.data[i][props.splitConfig.splitFields] >
-        splitTrackSpeed + 0.5
+        splitTrackSpeed + props.splitFieldsConfig.max
       ) {
         result.push(currentArray);
         addRange(
@@ -388,7 +409,8 @@ const splitFun = () => {
         );
         currentArray = [];
       } else if (
-        props.data[i][props.splitConfig.splitFields] < splitTrackSpeed
+        props.data[i][props.splitConfig.splitFields] <
+        props.splitFieldsConfig.min
       ) {
         result.push(currentArray);
         addRange(
@@ -401,8 +423,10 @@ const splitFun = () => {
         );
         currentArray = [];
       } else if (
-        props.data[i][props.splitConfig.splitFields] >= splitTrackSpeed &&
-        props.data[i][props.splitConfig.splitFields] <= splitTrackSpeed + 0.5
+        props.data[i][props.splitConfig.splitFields] >=
+          props.splitFieldsConfig.min &&
+        props.data[i][props.splitConfig.splitFields] <=
+          props.splitFieldsConfig.max
       ) {
         result.push(currentArray);
         addRange(
@@ -423,9 +447,12 @@ const splitFun = () => {
      */
     // If the previous number is in the [0.5,1] interval and the current number is greater than 1
     if (
-      props.data[i][props.splitConfig.splitFields] >= splitTrackSpeed &&
-      props.data[i][props.splitConfig.splitFields] <= splitTrackSpeed + 0.5 &&
-      props.data[i + 1][props.splitConfig.splitFields] > splitTrackSpeed + 0.5
+      props.data[i][props.splitConfig.splitFields] >=
+        props.splitFieldsConfig.min &&
+      props.data[i][props.splitConfig.splitFields] <=
+        props.splitFieldsConfig.max &&
+      props.data[i + 1][props.splitConfig.splitFields] >
+        props.splitFieldsConfig.max
     ) {
       result.push(currentArray);
       addRange(
@@ -440,9 +467,12 @@ const splitFun = () => {
     } else if (
       //If previous number is greater than [0.5,1] interval, and the current number is in interval
       i > 0 &&
-      props.data[i][props.splitConfig.splitFields] > splitTrackSpeed + 0.5 &&
-      props.data[i + 1][props.splitConfig.splitFields] >= splitTrackSpeed &&
-      props.data[i + 1][props.splitConfig.splitFields] <= splitTrackSpeed + 0.5
+      props.data[i][props.splitConfig.splitFields] >
+        props.splitFieldsConfig.max &&
+      props.data[i + 1][props.splitConfig.splitFields] >=
+        props.splitFieldsConfig.min &&
+      props.data[i + 1][props.splitConfig.splitFields] <=
+        props.splitFieldsConfig.max
     ) {
       result.push(currentArray);
       addRange(
@@ -457,9 +487,12 @@ const splitFun = () => {
     } else if (
       //If previous number is in the [0.5,1] interval and the new number is less than 0.5
       i > 0 &&
-      props.data[i][props.splitConfig.splitFields] >= splitTrackSpeed &&
-      props.data[i][props.splitConfig.splitFields] <= splitTrackSpeed + 0.5 &&
-      props.data[i + 1][props.splitConfig.splitFields] < splitTrackSpeed
+      props.data[i][props.splitConfig.splitFields] >=
+        props.splitFieldsConfig.min &&
+      props.data[i][props.splitConfig.splitFields] <=
+        props.splitFieldsConfig.max &&
+      props.data[i + 1][props.splitConfig.splitFields] <
+        props.splitFieldsConfig.min
     ) {
       result.push(currentArray);
       addRange(
@@ -474,10 +507,11 @@ const splitFun = () => {
     } else if (
       //If previous number is less than the [0.5,1] interval and the new number is in [0.5,1] interval
       i > 0 &&
-      props.data[i + 1][props.splitConfig.splitFields] >= splitTrackSpeed &&
+      props.data[i + 1][props.splitConfig.splitFields] >=
+        props.splitFieldsConfig.min &&
       props.data[i + 1][props.splitConfig.splitFields] <=
-        splitTrackSpeed + 0.5 &&
-      props.data[i][props.splitConfig.splitFields] < splitTrackSpeed
+        props.splitFieldsConfig.max &&
+      props.data[i][props.splitConfig.splitFields] < props.splitFieldsConfig.min
     ) {
       result.push(currentArray);
       addRange(
@@ -492,8 +526,10 @@ const splitFun = () => {
     } else if (
       //If previous number is greater than the [0.5,1] interval and the new number is less than the [0.5,1] interval
       i > 0 &&
-      props.data[i][props.splitConfig.splitFields] > splitTrackSpeed + 0.5 &&
-      props.data[i + 1][props.splitConfig.splitFields] < splitTrackSpeed
+      props.data[i][props.splitConfig.splitFields] >
+        props.splitFieldsConfig.max &&
+      props.data[i + 1][props.splitConfig.splitFields] <
+        props.splitFieldsConfig.min
     ) {
       result.push(currentArray);
       addRange(
@@ -510,8 +546,8 @@ const splitFun = () => {
       //If previous number is less than the [0.5,1] interval and the new number is greater than the [0.5,1] interval
       i > 0 &&
       props.data[i + 1][props.splitConfig.splitFields] >
-        splitTrackSpeed + 0.5 &&
-      props.data[i][props.splitConfig.splitFields] < splitTrackSpeed
+        props.splitFieldsConfig.max &&
+      props.data[i][props.splitConfig.splitFields] < props.splitFieldsConfig.min
     ) {
       result.push(currentArray);
       addRange(
@@ -525,6 +561,7 @@ const splitFun = () => {
       currentArray = [];
     }
   }
+  console.log(result);
   // Convert SVG elements to XML strings
   const newBacSvg = new XMLSerializer().serializeToString(bacSvg);
   const newFillSvg = new XMLSerializer().serializeToString(svg);
@@ -538,7 +575,6 @@ const splitFun = () => {
   bacSvgUrl.value = bacSvgHref;
   splitSvgUrl.value = newFillSvgHref;
 };
-const stagedIndexTimer = ref(null) as any;
 const executeAfterApproximatelyOneSecond = (
   callback: any,
   remainTime?: number
@@ -603,6 +639,11 @@ watch(
     }
   }
 );
+defineExpose({
+  widthValues,
+  initProgressBar,
+  width,
+});
 onMounted(() => {
   nextTick(() => {
     const dom = document.getElementsByClassName("color-split-progress-bar-bac");

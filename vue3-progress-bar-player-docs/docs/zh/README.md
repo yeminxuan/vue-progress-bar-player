@@ -4,7 +4,7 @@ title: Home
 heroImage: https://vuejs.press/images/hero.png
 actions:
   - text: 快速上手
-    link: /getting-started.html
+    link: http://localhost:8888/
     type: primary
 
   - text: 安装
