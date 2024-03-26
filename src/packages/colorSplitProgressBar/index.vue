@@ -55,11 +55,26 @@
         >
       </div>
     </div>
+    <CurrentTip
+      v-if="hasRealTimeTipBox"
+      ref="currentTipRef"
+      :style="{
+        transform: currentTipTranslate,
+        transition: isPlay
+          ? `transform ${
+            remainingTime == -1 ? duration / 1000 : remainingTime / 1000
+          }s  linear`
+          : ``,
+      }"
+    >
+      <slot name="currentTip" />
+    </CurrentTip>
   </div>
 </template>
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, ref, watch, computed } from "vue";
 import type { Ref } from "vue";
+import CurrentTip from "@packages/common/currentTip.vue";
 interface SplitConfig {
   splitFields: string;
   inRangeColor: string;
@@ -76,6 +91,7 @@ interface SplitFieldsConfig {
   min: number;
 }
 interface Props {
+  hasRealTimeTipBox: boolean;
   data: any;
   duration: number;
   isSplit?: boolean;
@@ -83,6 +99,7 @@ interface Props {
   splitFieldsConfig?: SplitFieldsConfig;
 }
 const props = withDefaults(defineProps<Props>(), {
+  hasRealTimeTipBox: false,
   data: () => [],
   duration: 1000,
   isSplit: false,
@@ -106,8 +123,19 @@ const emits = defineEmits<{
   (e: "refresh"): void;
   (e: "play"): void;
   (e: "skipProgress", index: number, item: any): void;
-  (e: "handlePlay", index: number): void;
+  (e: "handlePlay", index: number, item: any): void;
 }>();
+const currentTooltipTranslateX = ref(0);
+const currentTooltipTranslateY = ref(0);
+const currentTipHalfWidth = ref(0);
+const currentTipTranslate = computed(() => {
+  return `translateX(${
+    currentTooltipTranslateX.value +
+    (procentage.value / 100) * width.value -
+    currentTipHalfWidth.value
+  }px) translateY(${currentTooltipTranslateY.value}px)`;
+});
+const currentTipRef = ref();
 let stagedIndex = ref(0);
 const width = ref(0);
 const widthValues: Ref<any[]> = ref([]);
@@ -129,7 +157,6 @@ const computedWidth = () => {
   }
   widthValues.value = arr;
 };
-
 //Percentage of progress bar
 const procentage = ref(0);
 //Whether the player is playing
@@ -239,7 +266,7 @@ const refresh = () => {
   dataIndex.value = 0;
   isPlay.value = false;
   stagedIndex.value = 0;
-  emits("handlePlay", stagedIndex.value);
+  emits("handlePlay", stagedIndex.value,props.data[stagedIndex.value]);
   remainingTime.value = -1;
   //replay in 100 milliseconds later
   setTimeout(() => {
@@ -615,7 +642,7 @@ watch(
         ) {
           // console.log("Suspend subsequent play");
           stagedIndex.value++;
-          emits("handlePlay", stagedIndex.value);
+          emits("handlePlay", stagedIndex.value,props.data[stagedIndex.value]);
         }
       }, n[2]);
     } else {
@@ -632,7 +659,7 @@ watch(
               refreshClick.value = false;
             }
             stagedIndex.value++;
-            emits("handlePlay", stagedIndex.value);
+            emits("handlePlay", stagedIndex.value,props.data[stagedIndex.value]);
           }
         });
       }
@@ -640,14 +667,17 @@ watch(
   }
 );
 defineExpose({
-  widthValues,
   initProgressBar,
-  width,
 });
 onMounted(() => {
   nextTick(() => {
     const dom = document.getElementsByClassName("color-split-progress-bar-bac");
     width.value = dom[0].clientWidth;
+    currentTooltipTranslateX.value = dom[0].getBoundingClientRect().x;
+    currentTooltipTranslateY.value =
+      dom[0].getBoundingClientRect().y - dom[0].clientHeight - 8;
+    // console.log(dom[0].getBoundingClientRect());
+    currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
   });
   computedWidth();
   splitFun();
@@ -656,11 +686,18 @@ onMounted(() => {
       const dom = document.getElementsByClassName(
         "color-split-progress-bar-bac"
       );
+
       width.value = dom[0].clientWidth;
     });
     computedWidth();
     splitFun();
   });
+  // nextTick(() => {
+  //   const instance = tippy(".cursor", {
+  //     content: "2022-03-45",
+  //   });
+  //   instance[0].show();
+  // });
 });
 </script>
 <style scoped lang="less">
@@ -695,7 +732,9 @@ onMounted(() => {
       border: none;
       user-select: none;
       pointer-events: none;
+      position: relative;
     }
+
     .refresh {
       transition: width 0s linear;
     }

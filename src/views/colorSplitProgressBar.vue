@@ -1,11 +1,3 @@
-<!--
- * @Author: 叶敏轩 mc20000406@163.com
- * @Date: 2024-03-07 10:41:37
- * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-25 11:15:00
- * @FilePath: /vue3-process-bar-player/src/views/colorSplitProgressBar.vue
- * @Description: 
--->
 <template>
   <div class="colorSplitProcessBarWrap">
     <Example
@@ -16,20 +8,54 @@
         v-if="splitProgressData.length > 0"
         ref="ColorSplitProcessBarRef"
         :data="splitProgressData"
-        :duration="1000"
+        :has-real-time-tip-box="baseOptions.hasRealTimeTipBox"
+        :duration="baseOptions.duration"
         :is-split="true"
         :split-config="{
           splitFields: 'speed',
           inRangeColor: splitColorConfig.inRangeColor,
           outRangeColor: splitColorConfig.outRangeColor,
-          outRangeBacColor: splitColorConfig.inRangeBacColor,
-          inRangeBacColor: splitColorConfig.outRangeBacColor,
+          outRangeBacColor: splitColorConfig.outRangeBacColor,
+          inRangeBacColor: splitColorConfig.inRangeBacColor,
         }"
         :split-fields-config="splitFieldsConfig"
         @handle-play="handlePlay"
         @skip-progress="skipProgress"
-      />
+      >
+        <template #currentTip>
+          {{
+            currentDate
+          }}
+        </template>
+      </ColorSplitProcessBar>
       <div class="color-split-progress-control">
+        <div class="controlBox">
+          <div class="name">
+            Base
+          </div>
+          <div class="controlForm">
+            <div>
+              duration: <input
+                v-model="baseOptions.duration"
+                type="number"
+              >
+            </div>
+            <div>
+              hasRealTimePromptBox:
+              <select
+                v-model="hasRealTimeTipBoxValue"
+                @change="changeHasRealTimeTipBox"
+              >
+                <option value="true">
+                  true
+                </option>
+                <option value="false">
+                  false
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
         <div class="controlBox">
           <div class="name">
             splitColorConfig
@@ -73,13 +99,13 @@
             <div>
               max: <input
                 v-model="splitFieldsConfig.max"
-                type="text"
+                type="number"
               >
             </div>
             <div>
               min: <input
                 v-model="splitFieldsConfig.min"
-                type="text"
+                type="number"
               >
             </div>
           </div>
@@ -101,35 +127,55 @@ import ColorSplitProcessBar from "@packages/colorSplitProgressBar/index.vue";
 import Example from "@common/example.vue";
 import { ref } from "vue";
 const ColorSplitProcessBarRef = ref();
+import moment from "moment";
+const currentDate = ref(
+  moment(splitProgressData[0].gpstime).format("yyyy年MM月DD日 HH:mm:ss")
+);
+const hasRealTimeTipBoxValue = ref("true");
+const baseOptions = ref({
+  duration: 1000,
+  hasRealTimeTipBox: true,
+});
 const splitColorConfig = ref({
-  inRangeColor: "red",
-  outRangeColor: "blue",
-  inRangeBacColor: "rgba(255,0,0,0.3)",
-  outRangeBacColor: "rgba(0,0,255,0.3)",
+  inRangeColor: "blue",
+  outRangeColor: "red",
+  inRangeBacColor: "rgba(0,0,255,0.3)",
+  outRangeBacColor: "rgba(255,0,0,0.3)",
 });
 const splitFieldsConfig = ref({
-  max: 1,
-  min: 0.5,
+  max: 10,
+  min: 1,
 });
-const handlePlay = (index: number) => {
-  console.log(index);
+const handlePlay = (index: number, item: any) => {
+  console.log(index, item);
+  currentDate.value = moment(item.gpstime).format("yyyy年MM月DD日 HH:mm:ss");
 };
 const skipProgress = (index: number, item: any) => {
   console.log(index, item);
+  currentDate.value = moment(item.gpstime).format("yyyy年MM月DD日 HH:mm:ss");
 };
 const confirmSplitFieldsConfig = () => {
   ColorSplitProcessBarRef.value.initProgressBar();
 };
+const changeHasRealTimeTipBox = () => {
+  baseOptions.value.hasRealTimeTipBox = JSON.parse(
+    hasRealTimeTipBoxValue.value
+  );
+};
 const resetSplitFieldsConfig = () => {
+  baseOptions.value = {
+    duration: 1000,
+    hasRealTimeTipBox: true,
+  };
   splitColorConfig.value = {
-    inRangeColor: "red",
-    outRangeColor: "blue",
-    inRangeBacColor: "rgba(255,0,0,0.3)",
-    outRangeBacColor: "rgba(0,0,255,0.3)",
+    inRangeColor: "blue",
+    outRangeColor: "red",
+    inRangeBacColor: "rgba(0,0,255,0.3)",
+    outRangeBacColor: "rgba(255,0,0,0.3)",
   };
   splitFieldsConfig.value = {
-    max: 1,
-    min: 0.5,
+    max: 10,
+    min: 1,
   };
   ColorSplitProcessBarRef.value.initProgressBar();
 };
