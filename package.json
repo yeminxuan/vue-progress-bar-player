@@ -12,9 +12,6 @@
     "cz": "czg",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
-  "workspaces": [
-    "vue3-progress-bar-player-docs"
-  ],
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
@@ -47,8 +44,6 @@
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "@vitejs/plugin-vue": "^5.0.4",
-    "@vuepress/bundler-vite": "^2.0.0-rc.8",
-    "@vuepress/theme-default": "^2.0.0-rc.18",
     "commitlint": "^19.0.3",
     "conventional-changelog-cli": "^4.1.0",
     "cz-git": "^1.9.0",
@@ -63,7 +58,9 @@
     "typescript": "^5.2.2",
     "vite": "^5.1.4",
     "vite-plugin-dts": "^3.7.3",
-    "vue-tsc": "^1.8.27",
-    "vuepress": "^2.0.0-rc.8"
-  }
+    "vue": "^3.4.16",
+    "vue-eslint-parser": "^9.4.2",
+    "vue-tsc": "^1.8.27"
+  },
+  "packageManager": "yarn@4.1.1"
 }

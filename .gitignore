@@ -135,9 +135,4 @@ dist
 .eslintcache
 dist/
 
-# VuePress default temp directory
-vue3-process-bar-player-docs/docs/.vuepress/.temp
-# VuePress default cache directory
-vue3-process-bar-player-docs/docs/.vuepress/.cache
-# VuePress default build output directory
-vue3-process-bar-player-docs/docs/.vuepress/dist
+node_modules/

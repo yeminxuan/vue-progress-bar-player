@@ -88,7 +88,7 @@ const props = withDefaults(defineProps<Props>(), {
   isSplit: false,
   splitConfig: () => ({
     splitFields: "",
-    inRangeColor: "red",
+    inRangeColor: "blue",
     outRangeColor: "red",
     outRangeBacColor: "rgba(255,0,0,0.3)",
     inRangeBacColor: "rgba(0,0,255,0.3)",
