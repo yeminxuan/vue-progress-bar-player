@@ -27,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
       },
 
       {
-        path: "colorSplitProgressBar",
+        path: "progress-bar-player",
         components: {
           main: () => import("@views/colorSplitProgressBar.vue"),
         },

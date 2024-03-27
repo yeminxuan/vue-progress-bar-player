@@ -1,7 +1,14 @@
 <template>
   <div id="menu">
     <ul>
-      <li v-for="(item,index) in routerList" :key="index"><router-link :to="item.to">{{ item.name_zh }}</router-link></li>
+      <li
+        v-for="(item,index) in routerList"
+        :key="index"
+      >
+        <router-link :to="item.to">
+          {{ item.name_zh }}
+        </router-link>
+      </li>
     </ul>
   </div>
 </template>
@@ -17,8 +24,8 @@ const routerList = ref([
     to: "/overview",
   },
   {
-    name_zh: '颜色切割进度条',
-    to: "/colorSplitProgressBar",
+    name_zh: '进度条播放器',
+    to: "/progress-bar-player",
   },
 ]);
 </script>

@@ -37,7 +37,7 @@
         class="color-split-progress-bar-fill"
         :style="{
           width: procentage + '%',
-          background: isSplit ? 'none' : '#409eff',
+          background: isSplit ? 'none' : progressFillColor,
           transition: isPlay
             ? `width ${
               remainingTime == -1 ? duration / 1000 : remainingTime / 1000
@@ -90,14 +90,16 @@ interface SplitFieldsConfig {
   min: number;
 }
 interface Props {
-  hasRealTimeTipBox: boolean;
   data: any;
   duration: number;
+  progressFillColor?: string;
   isSplit?: boolean;
   splitConfig?: SplitConfig;
   splitFieldsConfig?: SplitFieldsConfig;
+  hasRealTimeTipBox?: boolean;
 }
 const props = withDefaults(defineProps<Props>(), {
+  progressFillColor: "#409eff",
   hasRealTimeTipBox: false,
   data: () => [],
   duration: 1000,
