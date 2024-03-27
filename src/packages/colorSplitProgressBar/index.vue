@@ -8,20 +8,17 @@
 <template>
   <div class="color-split-progress-bar">
     <div class="controlBtn">
-      <i
+      <slot
         v-if="!isPlay && procentage < 100"
-        class="iconfont icon-bofang"
-        @click="play"
+        name="play"
       />
-      <i
+      <slot
         v-if="isPlay"
-        class="iconfont icon-zanting"
-        @click="pause"
+        name="pause"
       />
-      <i
+      <slot
         v-if="!refreshClick && procentage == 100"
-        class="iconfont icon-zhongzhi"
-        @click="refresh"
+        name="refresh"
       />
     </div>
     <div
@@ -671,6 +668,9 @@ watch(
   }
 );
 defineExpose({
+  play,
+  pause,
+  refresh,
   initProgressBar,
 });
 onMounted(() => {

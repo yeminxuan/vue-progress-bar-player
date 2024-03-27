@@ -20,6 +20,24 @@
         }"
         :split-fields-config="{ max: 10, min: 0 }"
       >
+        <template #play>
+          <i
+            class="iconfont icon-bofang"
+            @click="ColorSplitProcessBarRef.play()"
+          />
+        </template>
+        <template #pause>
+          <i
+            class="iconfont icon-zanting"
+            @click="ColorSplitProcessBarRef.pause()"
+          />
+        </template>
+        <template #refresh>
+          <i
+            class="iconfont icon-zhongzhi"
+            @click="ColorSplitProcessBarRef.refresh()"
+          />
+        </template>
         <template #currentTip>
           {{ currentDate }}
         </template>
@@ -31,7 +49,7 @@
     >
       <ColorSplitProcessBar
         v-if="splitProgressData.length > 0"
-        ref="ColorSplitProcessBarRef"
+        ref="ColorSplitProcessBarRef1"
         :data="splitProgressData"
         :has-real-time-tip-box="true"
         :duration="100"
@@ -47,6 +65,24 @@
         @handle-play="handleHasTipPlay"
         @skip-progress="skipHasTipProgress"
       >
+        <template #play>
+          <i
+            class="iconfont icon-bofang"
+            @click="ColorSplitProcessBarRef1.play()"
+          />
+        </template>
+        <template #pause>
+          <i
+            class="iconfont icon-zanting"
+            @click="ColorSplitProcessBarRef1.pause()"
+          />
+        </template>
+        <template #refresh>
+          <i
+            class="iconfont icon-zhongzhi"
+            @click="ColorSplitProcessBarRef1.refresh()"
+          />
+        </template>
         <template #currentTip>
           {{ currentDate }}
         </template>
@@ -64,9 +100,10 @@ const currentDate = ref(
   moment(splitProgressData[0].gpstime).format("yyyy/MM/DD HH:mm:ss")
 );
 const ColorSplitProcessBarRef = ref();
+const ColorSplitProcessBarRef1 = ref();
 const handleHasTipPlay = (item: any) => {
   console.log(item);
-  
+
   currentDate.value = moment(item.gpstime).format("yyyy/MM/DD HH:mm:ss");
 };
 const skipHasTipProgress = (item: any) => {
