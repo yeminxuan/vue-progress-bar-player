@@ -25,6 +25,7 @@
       />
     </div>
     <div
+      ref="colorSplitProgressBarBacRef"
       class="color-split-progress-bar-bac"
       :style="{
         background: isSplit ? `url(${bacSvgUrl})` : '#ccc',
@@ -32,6 +33,7 @@
       @mousedown.stop="changeSlider($event)"
     >
       <div
+        ref="colorSplitProgressBarFillRef"
         :class="{
           refresh: refreshClick == false,
         }"
@@ -123,8 +125,10 @@ const emits = defineEmits<{
   (e: "refresh"): void;
   (e: "play"): void;
   (e: "skipProgress", index: number, item: any): void;
-  (e: "handlePlay", index: number, item: any): void;
+  (e: "handlePlay", item: any, index: number): void;
 }>();
+const colorSplitProgressBarBacRef = ref();
+const colorSplitProgressBarFillRef = ref();
 const currentTooltipTranslateX = ref(0);
 const currentTooltipTranslateY = ref(0);
 const currentTipHalfWidth = ref(0);
@@ -147,11 +151,11 @@ const computedWidth = () => {
     );
   }
   for (let i = 0; i < props.data.length; i++) {
-    const dom = document.getElementsByClassName("color-split-progress-bar-bac");
+    const domClientWidth = colorSplitProgressBarBacRef.value.clientWidth;
     let obj = {
       procentage: (i * 100) / (props.data.length - 1),
       index: i,
-      width: (dom[0].clientWidth * i) / (props.data.length - 1),
+      width: (domClientWidth * i) / (props.data.length - 1),
     };
     arr.push(obj);
   }
@@ -181,11 +185,10 @@ const initProgressBar = () => {
     procentage.value = 0;
     isPlay.value = false;
     refreshClick.value = false;
+    clearInterval(progressTimer.value);
     nextTick(() => {
-      const dom = document.getElementsByClassName(
-        "color-split-progress-bar-bac"
-      );
-      width.value = dom[0].clientWidth;
+      const domClientWidth = colorSplitProgressBarBacRef.value.clientWidth;
+      width.value = domClientWidth;
     });
     computedWidth();
     splitFun();
@@ -249,9 +252,7 @@ const play = () => {
   }
 };
 const pause = () => {
-  fillWidth.value = document.getElementsByClassName(
-    "color-split-progress-bar-fill"
-  )[0].clientWidth;
+  fillWidth.value = colorSplitProgressBarFillRef.value.clientWidth;
   computedPauseOffsetX();
   clearInterval(progressTimer.value);
   progressTimer.value = null;
@@ -266,7 +267,7 @@ const refresh = () => {
   dataIndex.value = 0;
   isPlay.value = false;
   stagedIndex.value = 0;
-  emits("handlePlay", stagedIndex.value,props.data[stagedIndex.value]);
+  emits("handlePlay", props.data[stagedIndex.value], stagedIndex.value);
   remainingTime.value = -1;
   //replay in 100 milliseconds later
   setTimeout(() => {
@@ -281,9 +282,7 @@ const changeSlider = (e: MouseEvent) => {
   };
   document.onmouseup = (event) => {
     computedOffsetX(event);
-    fillWidth.value = document.getElementsByClassName(
-      "color-split-progress-bar-fill"
-    )[0].clientWidth;
+    fillWidth.value = colorSplitProgressBarFillRef.value.clientWidth;
     computedPauseOffsetX();
     document.onmousemove = null;
     document.onmouseup = null;
@@ -292,10 +291,7 @@ const changeSlider = (e: MouseEvent) => {
 const computedOffsetX = (event: MouseEvent) => {
   let closest = { percentage: -1, index: 0 };
   let offsetX =
-    event.pageX -
-    document
-      .getElementsByClassName("color-split-progress-bar-bac")[0]
-      .getBoundingClientRect().x;
+    event.pageX - colorSplitProgressBarBacRef.value.getBoundingClientRect().x;
   let currentProcentage = (offsetX / width.value) * 100;
   if (currentProcentage <= 0) {
     currentProcentage = 0;
@@ -642,7 +638,7 @@ watch(
         ) {
           // console.log("Suspend subsequent play");
           stagedIndex.value++;
-          emits("handlePlay", stagedIndex.value,props.data[stagedIndex.value]);
+          emits("handlePlay", props.data[stagedIndex.value], stagedIndex.value);
         }
       }, n[2]);
     } else {
@@ -658,8 +654,16 @@ watch(
               isPlay.value = false;
               refreshClick.value = false;
             }
+            if (props.hasRealTimeTipBox) {
+              currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
+              console.log(currentTipHalfWidth.value);
+            }
             stagedIndex.value++;
-            emits("handlePlay", stagedIndex.value,props.data[stagedIndex.value]);
+            emits(
+              "handlePlay",
+              props.data[stagedIndex.value],
+              stagedIndex.value
+            );
           }
         });
       }
@@ -671,33 +675,29 @@ defineExpose({
 });
 onMounted(() => {
   nextTick(() => {
-    const dom = document.getElementsByClassName("color-split-progress-bar-bac");
-    width.value = dom[0].clientWidth;
-    currentTooltipTranslateX.value = dom[0].getBoundingClientRect().x;
+    width.value = colorSplitProgressBarBacRef.value.clientWidth;
+    currentTooltipTranslateX.value =
+      colorSplitProgressBarBacRef.value.getBoundingClientRect().x;
     currentTooltipTranslateY.value =
-      dom[0].getBoundingClientRect().y - dom[0].clientHeight - 8;
-    // console.log(dom[0].getBoundingClientRect());
-    currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
+      colorSplitProgressBarBacRef.value.getBoundingClientRect().y -
+      colorSplitProgressBarBacRef.value.clientHeight -
+      8;
+    if (props.hasRealTimeTipBox) {
+      currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
+    }
   });
   computedWidth();
   splitFun();
   window.addEventListener("resize", () => {
     nextTick(() => {
-      const dom = document.getElementsByClassName(
-        "color-split-progress-bar-bac"
-      );
-
-      width.value = dom[0].clientWidth;
+      width.value = colorSplitProgressBarBacRef.value.clientWidth;
     });
     computedWidth();
     splitFun();
+    if (props.hasRealTimeTipBox) {
+      currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
+    }
   });
-  // nextTick(() => {
-  //   const instance = tippy(".cursor", {
-  //     content: "2022-03-45",
-  //   });
-  //   instance[0].show();
-  // });
 });
 </script>
 <style scoped lang="less">

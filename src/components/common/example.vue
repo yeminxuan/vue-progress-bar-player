@@ -2,17 +2,17 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 12:33:54
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-08 10:57:46
+ * @LastEditTime: 2024-03-27 13:21:27
  * @FilePath: /vue3-process-bar-player/src/components/common/example.vue
  * @Description: 
 -->
 <template>
   <div class="example">
     <div class="title">
-      <h1>{{ title }}</h1>
+      <h2>{{ title }}</h2>
     </div>
     <div class="example-box">
-      <slot></slot>
+      <slot />
     </div>
   </div>
 </template>

@@ -28,8 +28,8 @@
       "@views/*": ["./src/views/*"],
       "@style/*": ["./src/style/*"],
       "@api/*": ["./src/api/*"],
-      "@packages/*": ["./src/packages/*"],
-    },
+      "@packages/*": ["./src/packages/*"]
+    }
   },
   "include": [
     "src/**/*.ts",
