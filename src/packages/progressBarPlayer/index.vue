@@ -7,20 +7,12 @@
 -->
 <template>
   <div class="progress-bar-player">
-    <div class="controlBtn">
-      <slot
-        v-if="!isPlay && procentage < 100"
-        name="play"
-      />
-      <slot
-        v-if="isPlay"
-        name="pause"
-      />
-      <slot
-        v-if="!refreshClick && procentage == 100"
-        name="refresh"
-      />
-    </div>
+    <slot
+      name="controlBtn"
+      :play="!isPlay && procentage < 100"
+      :pause="isPlay"
+      :refresh="!refreshClick && procentage == 100"
+    />
     <div
       ref="progressBarPlayerBacRef"
       class="progress-bar-player-bac"
