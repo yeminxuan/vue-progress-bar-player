@@ -1,7 +1,7 @@
 # vue3-process-bar-player
 
 #### Description
-进度条播放进度条控制组件
+vue progress bar player
 
 #### Software Architecture
 Software architecture description

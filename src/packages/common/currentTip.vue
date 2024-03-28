@@ -15,8 +15,12 @@ const cursorRef = ref();
 const getHalfWidth = () => {
   return cursorRef.value.clientWidth / 2;
 };
+const getHeight = () => {
+  return cursorRef.value.clientHeight;
+};
 defineExpose({
   getHalfWidth,
+  getHeight
 });
 </script>
 <style lang="less" scoped>

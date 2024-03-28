@@ -1,45 +1,42 @@
 <template>
-  <div class="colorSplitProcessBarWrap">
+  <div class="progressBarPlayerWrap">
     <Example
       title="Basic usage"
-      class="color-split-progress"
+      class="progress-bar-player-wrap"
     >
-      <ColorSplitProcessBar
+      <ProgressBarPlayer
         v-if="splitProgressData.length > 0"
-        ref="ColorSplitProcessBarRef"
+        ref="progressBarPlayerRef"
         :data="splitProgressData"
         :duration="100"
       >
         <template #play>
           <i
             class="iconfont icon-bofang"
-            @click="ColorSplitProcessBarRef.play()"
+            @click="progressBarPlayerRef.play()"
           />
         </template>
         <template #pause>
           <i
             class="iconfont icon-zanting"
-            @click="ColorSplitProcessBarRef.pause()"
+            @click="progressBarPlayerRef.pause()"
           />
         </template>
         <template #refresh>
           <i
             class="iconfont icon-zhongzhi"
-            @click="ColorSplitProcessBarRef.refresh()"
+            @click="progressBarPlayerRef.refresh()"
           />
         </template>
-        <template #currentTip>
-          {{ currentDate }}
-        </template>
-      </ColorSplitProcessBar>
+      </ProgressBarPlayer>
     </Example>
     <Example
       title="Color split process bar"
-      class="color-split-progress"
+      class="progress-bar-player-wrap"
     >
-      <ColorSplitProcessBar
+      <ProgressBarPlayer
         v-if="splitProgressData.length > 0"
-        ref="ColorSplitProcessBarRef1"
+        ref="progressBarPlayerRef1"
         :data="splitProgressData"
         :duration="100"
         :is-split="true"
@@ -55,33 +52,30 @@
         <template #play>
           <i
             class="iconfont icon-bofang"
-            @click="ColorSplitProcessBarRef1.play()"
+            @click="progressBarPlayerRef1.play()"
           />
         </template>
         <template #pause>
           <i
             class="iconfont icon-zanting"
-            @click="ColorSplitProcessBarRef1.pause()"
+            @click="progressBarPlayerRef1.pause()"
           />
         </template>
         <template #refresh>
           <i
             class="iconfont icon-zhongzhi"
-            @click="ColorSplitProcessBarRef1.refresh()"
+            @click="progressBarPlayerRef1.refresh()"
           />
         </template>
-        <template #currentTip>
-          {{ currentDate }}
-        </template>
-      </ColorSplitProcessBar>
+      </ProgressBarPlayer>
     </Example>
     <Example
       title="Color split process bar & Real time tip"
-      class="color-split-progress"
+      class="progress-bar-player-wrap"
     >
-      <ColorSplitProcessBar
+      <ProgressBarPlayer
         v-if="splitProgressData.length > 0"
-        ref="ColorSplitProcessBarRef2"
+        ref="progressBarPlayerRef2"
         :data="splitProgressData"
         :has-real-time-tip-box="true"
         :duration="100"
@@ -100,40 +94,40 @@
         <template #play>
           <i
             class="iconfont icon-bofang"
-            @click="ColorSplitProcessBarRef2.play()"
+            @click="progressBarPlayerRef2.play()"
           />
         </template>
         <template #pause>
           <i
             class="iconfont icon-zanting"
-            @click="ColorSplitProcessBarRef2.pause()"
+            @click="progressBarPlayerRef2.pause()"
           />
         </template>
         <template #refresh>
           <i
             class="iconfont icon-zhongzhi"
-            @click="ColorSplitProcessBarRef2.refresh()"
+            @click="progressBarPlayerRef2.refresh()"
           />
         </template>
         <template #currentTip>
           {{ currentDate }}
         </template>
-      </ColorSplitProcessBar>
+      </ProgressBarPlayer>
     </Example>
   </div>
 </template>
 <script setup lang="ts">
 import { splitProgressData } from "@/assets/data";
-import ColorSplitProcessBar from "@packages/colorSplitProgressBar/index.vue";
+import ProgressBarPlayer from "@packages/progressBarPlayer/index.vue";
 import Example from "@common/example.vue";
 import { ref } from "vue";
 import moment from "moment";
 const currentDate = ref(
   moment(splitProgressData[0].gpstime).format("yyyy/MM/DD HH:mm:ss")
 );
-const ColorSplitProcessBarRef = ref();
-const ColorSplitProcessBarRef1 = ref();
-const ColorSplitProcessBarRef2 = ref();
+const progressBarPlayerRef = ref();
+const progressBarPlayerRef1 = ref();
+const progressBarPlayerRef2 = ref();
 const handleHasTipPlay = (item: any) => {
   console.log(item);
 
@@ -144,34 +138,19 @@ const skipHasTipProgress = (item: any) => {
 };
 </script>
 <style scoped lang="less">
-button {
-  padding: 2px 5px;
-  font-size: 14px;
-  cursor: pointer;
-}
-.color-split-progress {
-  .color-split-progress-control {
-    margin-top: 10px;
-    background-color: #f6f6f7;
-    padding: 10px;
-    .controlBox {
-      .name {
-        font-size: 16px;
-        color: #333;
-        font-weight: bold;
-      }
-      .controlForm {
-        margin-left: 10px;
-        & > div {
-          margin-top: 5px;
-          font-size: 14px;
-        }
-      }
-    }
+:deep(.progress-bar-player-wrap) {
+  .progress-bar-player {
+    height: 30px;
     .controlBtn {
-      margin-top: 10px;
-      button:last-child {
-        margin-left: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #dcdfe6;
+      height: 28px;
+      width: 30px;
+      cursor: pointer;
+      i {
+        color: #000;
       }
     }
   }

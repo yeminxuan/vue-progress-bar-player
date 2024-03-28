@@ -2,11 +2,11 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-06 19:06:46
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @FilePath: /vue3-process-bar-player/src/packages/colorSplitProgressBar/index.vue
+ * @FilePath: /vue3-process-bar-player/src/packages/ProgressBarPlayer/index.vue
  * @Description: 
 -->
 <template>
-  <div class="color-split-progress-bar">
+  <div class="progress-bar-player">
     <div class="controlBtn">
       <slot
         v-if="!isPlay && procentage < 100"
@@ -22,19 +22,19 @@
       />
     </div>
     <div
-      ref="colorSplitProgressBarBacRef"
-      class="color-split-progress-bar-bac"
+      ref="progressBarPlayerBacRef"
+      class="progress-bar-player-bac"
       :style="{
         background: isSplit ? `url(${bacSvgUrl})` : '#ccc',
       }"
       @mousedown.stop="changeSlider($event)"
     >
       <div
-        ref="colorSplitProgressBarFillRef"
+        ref="progressBarPlayerBacFillRef"
         :class="{
           refresh: refreshClick == false,
         }"
-        class="color-split-progress-bar-fill"
+        class="progress-bar-player-fill"
         :style="{
           width: procentage + '%',
           background: isSplit ? 'none' : progressFillColor,
@@ -126,8 +126,9 @@ const emits = defineEmits<{
   (e: "skipProgress", index: number, item: any): void;
   (e: "handlePlay", item: any, index: number): void;
 }>();
-const colorSplitProgressBarBacRef = ref();
-const colorSplitProgressBarFillRef = ref();
+const height = ref(0);
+const progressBarPlayerBacRef = ref();
+const progressBarPlayerBacFillRef = ref();
 const currentTooltipTranslateX = ref(0);
 const currentTooltipTranslateY = ref(0);
 const currentTipHalfWidth = ref(0);
@@ -150,7 +151,7 @@ const computedWidth = () => {
     );
   }
   for (let i = 0; i < props.data.length; i++) {
-    const domClientWidth = colorSplitProgressBarBacRef.value.clientWidth;
+    const domClientWidth = progressBarPlayerBacRef.value.clientWidth;
     let obj = {
       procentage: (i * 100) / (props.data.length - 1),
       index: i,
@@ -170,7 +171,6 @@ const progressTimer = ref(null) as any;
 const refreshClick = ref(false);
 const dataIndex = ref(0);
 const remainingTime = ref(-1);
-const splitTrackSpeed = 0.5;
 const splitSvgUrl = ref("");
 const bacSvgUrl = ref("");
 const stagedIndexTimer = ref(null) as any;
@@ -186,7 +186,7 @@ const initProgressBar = () => {
     refreshClick.value = false;
     clearInterval(progressTimer.value);
     nextTick(() => {
-      const domClientWidth = colorSplitProgressBarBacRef.value.clientWidth;
+      const domClientWidth = progressBarPlayerBacRef.value.clientWidth;
       width.value = domClientWidth;
     });
     computedWidth();
@@ -251,7 +251,7 @@ const play = () => {
   }
 };
 const pause = () => {
-  fillWidth.value = colorSplitProgressBarFillRef.value.clientWidth;
+  fillWidth.value = progressBarPlayerBacFillRef.value.clientWidth;
   computedPauseOffsetX();
   clearInterval(progressTimer.value);
   progressTimer.value = null;
@@ -281,7 +281,7 @@ const changeSlider = (e: MouseEvent) => {
   };
   document.onmouseup = (event) => {
     computedOffsetX(event);
-    fillWidth.value = colorSplitProgressBarFillRef.value.clientWidth;
+    fillWidth.value = progressBarPlayerBacFillRef.value.clientWidth;
     computedPauseOffsetX();
     document.onmousemove = null;
     document.onmouseup = null;
@@ -290,7 +290,7 @@ const changeSlider = (e: MouseEvent) => {
 const computedOffsetX = (event: MouseEvent) => {
   let closest = { percentage: -1, index: 0 };
   let offsetX =
-    event.pageX - colorSplitProgressBarBacRef.value.getBoundingClientRect().x;
+    event.pageX - progressBarPlayerBacRef.value.getBoundingClientRect().x;
   let currentProcentage = (offsetX / width.value) * 100;
   if (currentProcentage <= 0) {
     currentProcentage = 0;
@@ -390,13 +390,13 @@ const addRange = (
   const rect = document.createElementNS(ns, "rect");
   rect.setAttribute("x", `${x}`);
   rect.setAttribute("width", `${width}`);
-  rect.setAttribute("height", "30");
+  rect.setAttribute("height", `${height.value}`);
   rect.setAttribute("fill", bacColor);
   rect.setAttribute("stroke", "none");
   const fillRect = document.createElementNS(ns, "rect");
   fillRect.setAttribute("x", `${x}`);
   fillRect.setAttribute("width", `${width}`);
-  fillRect.setAttribute("height", "30");
+  fillRect.setAttribute("height", `${height.value}`);
   fillRect.setAttribute("fill", splitColor);
   fillRect.setAttribute("stroke", "none");
   svg.appendChild(fillRect);
@@ -409,7 +409,7 @@ const splitFun = () => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   const bacSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   bacSvg.setAttribute("width", "100%");
-  bacSvg.setAttribute("height", "30px");
+  bacSvg.setAttribute("height", `${height.value}px`);
   for (let i = 0; i < props.data.length; i++) {
     if (i != 0) {
       currentArray.push({ ...props.data[i], dataIndex: i });
@@ -418,7 +418,7 @@ const splitFun = () => {
     if (i == props.data.length - 1) {
       if (
         props.data[i][props.splitConfig.splitFields] >
-        splitTrackSpeed + props.splitFieldsConfig.max
+        props.splitFieldsConfig.max
       ) {
         result.push(currentArray);
         addRange(
@@ -675,16 +675,17 @@ defineExpose({
   refresh,
   initProgressBar,
 });
-onMounted(() => {
-  nextTick(() => {
-    width.value = colorSplitProgressBarBacRef.value.clientWidth;
-    currentTooltipTranslateX.value =
-      colorSplitProgressBarBacRef.value.getBoundingClientRect().x;
-    currentTooltipTranslateY.value =
-      colorSplitProgressBarBacRef.value.getBoundingClientRect().y -
-      colorSplitProgressBarBacRef.value.clientHeight -
-      8;
+onMounted(async () => {
+  await nextTick(() => {
+    width.value = progressBarPlayerBacRef.value.clientWidth;
+    height.value = progressBarPlayerBacRef.value.clientHeight;
     if (props.hasRealTimeTipBox) {
+      currentTooltipTranslateX.value =
+        progressBarPlayerBacRef.value.getBoundingClientRect().x;
+      currentTooltipTranslateY.value =
+        progressBarPlayerBacRef.value.getBoundingClientRect().y -
+        currentTipRef.value.getHeight() -
+        10;
       currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
     }
   });
@@ -692,42 +693,33 @@ onMounted(() => {
   splitFun();
   window.addEventListener("resize", () => {
     nextTick(() => {
-      width.value = colorSplitProgressBarBacRef.value.clientWidth;
+      width.value = progressBarPlayerBacRef.value.clientWidth;
     });
     computedWidth();
     splitFun();
     if (props.hasRealTimeTipBox) {
       currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
+      currentTooltipTranslateY.value =
+        progressBarPlayerBacRef.value.getBoundingClientRect().y -
+        currentTipRef.value.getHeight() -
+        10;
     }
   });
 });
 </script>
 <style scoped lang="less">
 @import "@assets/style/iconfont.css";
-.color-split-progress-bar {
+.progress-bar-player {
   width: 100%;
-  height: 30px;
   display: flex;
-  .controlBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #dcdfe6;
-    height: 28px;
-    width: 30px;
-    cursor: pointer;
-    i {
-      color: #000;
-    }
-  }
-  .color-split-progress-bar-bac {
+  .progress-bar-player-bac {
     flex: 1;
     height: 100%;
     border-radius: 5px;
     overflow: hidden;
     cursor: pointer;
     user-select: none;
-    .color-split-progress-bar-fill {
+    .progress-bar-player-fill {
       height: 100%;
       border-radius: 5px;
       will-change: transition;

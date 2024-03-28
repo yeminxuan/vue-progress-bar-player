@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-06 11:19:39
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-08 11:02:14
+ * @LastEditTime: 2024-03-28 13:27:00
  * @FilePath: /vue3-process-bar-player/vite.config.ts
  * @Description:
  */
@@ -10,6 +10,7 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
 import dts from "vite-plugin-dts";
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   if (mode == "npm") {
@@ -19,6 +20,7 @@ export default defineConfig(({ mode }) => {
         dts({
           entryRoot: "src/packages/colorSplitProgressBar",
         }),
+        cssInjectedByJsPlugin()
       ],
       resolve: {
         // 配置路径别名
@@ -40,7 +42,7 @@ export default defineConfig(({ mode }) => {
         lib: {
           entry: "src/packages/export.ts",
           formats: ["cjs", "es", "umd"],
-          name: "ColorSplitProgressBar",
+          name: "@ymx/progeess-bar",
           fileName: "index",
         },
         rollupOptions: {
