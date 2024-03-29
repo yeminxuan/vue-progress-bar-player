@@ -11,22 +11,26 @@
         :duration="100"
       >
         <template #controlBtn="{ play, pause, refresh }">
-          <div class="controlBtn">
-            <i
-              v-if="play"
-              class="iconfont icon-bofang"
-              @click="progressBarPlayerRef.play()"
-            />
-            <i
-              v-if="pause"
-              class="iconfont icon-zanting"
-              @click="progressBarPlayerRef.pause()"
-            />
-            <i
-              v-if="refresh"
-              class="iconfont icon-zhongzhi"
-              @click="progressBarPlayerRef.refresh()"
-            />
+          <div
+            v-if="play"
+            class="controlBtn"
+            @click="progressBarPlayerRef.play()"
+          >
+            <i class="iconfont icon-bofang" />
+          </div>
+          <div
+            v-if="pause"
+            class="controlBtn"
+            @click="progressBarPlayerRef.pause()"
+          >
+            <i class="iconfont icon-zanting" />
+          </div>
+          <div
+            v-if="refresh"
+            class="controlBtn"
+            @click="progressBarPlayerRef.refresh()"
+          >
+            <i class="iconfont icon-zhongzhi" />
           </div>
         </template>
       </ProgressBarPlayer>
@@ -48,25 +52,29 @@
           inRangeBacColor: 'rgba(0,0,255,0.3)',
           outRangeBacColor: 'rgba(255,0,0,0.3)',
         }"
-        :split-fields-config="{ max: 10, min: 0 }"
+        split-fields-interval="[0,10]"
       >
         <template #controlBtn="{ play, pause, refresh }">
-          <div class="controlBtn">
-            <i
-              v-if="play"
-              class="iconfont icon-bofang"
-              @click="progressBarPlayerRef1.play()"
-            />
-            <i
-              v-if="pause"
-              class="iconfont icon-zanting"
-              @click="progressBarPlayerRef1.pause()"
-            />
-            <i
-              v-if="refresh"
-              class="iconfont icon-zhongzhi"
-              @click="progressBarPlayerRef1.refresh()"
-            />
+          <div
+            v-if="play"
+            class="controlBtn"
+            @click="progressBarPlayerRef1.play()"
+          >
+            <i class="iconfont icon-bofang" />
+          </div>
+          <div
+            v-if="pause"
+            class="controlBtn"
+            @click="progressBarPlayerRef1.pause()"
+          >
+            <i class="iconfont icon-zanting" />
+          </div>
+          <div
+            v-if="refresh"
+            class="controlBtn"
+            @click="progressBarPlayerRef1.refresh()"
+          >
+            <i class="iconfont icon-zhongzhi" />
           </div>
         </template>
       </ProgressBarPlayer>
@@ -89,27 +97,31 @@
           inRangeBacColor: 'rgba(0,0,255,0.3)',
           outRangeBacColor: 'rgba(255,0,0,0.3)',
         }"
-        :split-fields-config="{ max: 10, min: 0 }"
+        split-fields-interval="[0,10]"
         @handle-play="handleHasTipPlay"
         @skip-progress="skipHasTipProgress"
       >
         <template #controlBtn="{ play, pause, refresh }">
-          <div class="controlBtn">
-            <i
-              v-if="play"
-              class="iconfont icon-bofang"
-              @click="progressBarPlayerRef2.play()"
-            />
-            <i
-              v-if="pause"
-              class="iconfont icon-zanting"
-              @click="progressBarPlayerRef2.pause()"
-            />
-            <i
-              v-if="refresh"
-              class="iconfont icon-zhongzhi"
-              @click="progressBarPlayerRef2.refresh()"
-            />
+          <div
+            v-if="play"
+            class="controlBtn"
+            @click="progressBarPlayerRef2.play()"
+          >
+            <i class="iconfont icon-bofang" />
+          </div>
+          <div
+            v-if="pause"
+            class="controlBtn"
+            @click="progressBarPlayerRef2.pause()"
+          >
+            <i class="iconfont icon-zanting" />
+          </div>
+          <div
+            v-if="refresh"
+            class="controlBtn"
+            @click="progressBarPlayerRef2.refresh()"
+          >
+            <i class="iconfont icon-zhongzhi" />
           </div>
         </template>
         <template #currentTip>

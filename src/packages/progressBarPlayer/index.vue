@@ -1,10 +1,3 @@
-<!--
- * @Author: 叶敏轩 mc20000406@163.com
- * @Date: 2024-03-06 19:06:46
- * @LastEditors: 叶敏轩 mc20000406@163.com
- * @FilePath: /vue3-process-bar-player/src/packages/ProgressBarPlayer/index.vue
- * @Description: 
--->
 <template>
   <div class="progress-bar-player">
     <slot
@@ -66,6 +59,7 @@
 import { nextTick, onMounted, ref, watch, computed } from "vue";
 import type { Ref } from "vue";
 import CurrentTip from "@packages/common/currentTip.vue";
+import { isNumeric } from "../utils/utils";
 interface SplitConfig {
   splitFields: string;
   inRangeColor: string;
@@ -77,18 +71,14 @@ interface SplitConfig {
   outRangeBacColor: string;
   inRangeBacColor: string;
 }
-interface SplitFieldsConfig {
-  max: number;
-  min: number;
-}
 interface Props {
   data: any;
   duration: number;
   progressFillColor?: string;
   isSplit?: boolean;
   splitConfig?: SplitConfig;
-  splitFieldsConfig?: SplitFieldsConfig;
   hasRealTimeTipBox?: boolean;
+  splitFieldsInterval?: string;
 }
 const props = withDefaults(defineProps<Props>(), {
   progressFillColor: "#409eff",
@@ -107,10 +97,7 @@ const props = withDefaults(defineProps<Props>(), {
       y: 0,
     },
   }),
-  splitFieldsConfig: () => ({
-    max: 0,
-    min: 0,
-  }),
+  splitFieldsInterval: "",
 });
 const emits = defineEmits<{
   (e: "refresh"): void;
@@ -396,10 +383,34 @@ const addRange = (
 };
 
 const splitFun = () => {
+  if (props.splitFieldsInterval == "") return;
   let result: any = [];
   let currentArray: any = [];
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   const bacSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const startInterval = props.splitFieldsInterval.split(",")[0];
+  const endInterval = props.splitFieldsInterval.split(",")[1];
+  const start_matches = /[\[|\(]/.exec(startInterval);
+  const end_matches = /[\)|\]]/.exec(endInterval);
+  /* Error feedback start */
+  if (start_matches == null || end_matches == null)
+    throw Error("Please use `[]` or `()` to include the interval you set");
+  if (
+    !isNumeric(startInterval.split(start_matches[0])[1]) ||
+    !isNumeric(endInterval.split(end_matches[0])[0])
+  )
+    throw Error(`Invalid comparison interval => ${props.splitFieldsInterval}`);
+  /* Error feedback end */
+  const newInterval = [
+    start_matches[0],
+    isNumeric(startInterval.split(start_matches[0])[1])
+      ? Number(startInterval.split(start_matches[0])[1])
+      : startInterval.split(start_matches[0])[1],
+    isNumeric(endInterval.split(end_matches[0])[0])
+      ? Number(endInterval.split(end_matches[0])[0])
+      : endInterval.split(end_matches[0])[0],
+    end_matches[0],
+  ];
   bacSvg.setAttribute("width", "100%");
   bacSvg.setAttribute("height", `${height.value}px`);
   for (let i = 0; i < props.data.length; i++) {
@@ -409,8 +420,9 @@ const splitFun = () => {
     /* when the loop reaches the last element */
     if (i == props.data.length - 1) {
       if (
-        props.data[i][props.splitConfig.splitFields] >
-        props.splitFieldsConfig.max
+        newInterval[3] == "]"
+          ? props.data[i][props.splitConfig.splitFields] > newInterval[2]
+          : props.data[i][props.splitConfig.splitFields] >= newInterval[2]
       ) {
         result.push(currentArray);
         addRange(
@@ -423,8 +435,9 @@ const splitFun = () => {
         );
         currentArray = [];
       } else if (
-        props.data[i][props.splitConfig.splitFields] <
-        props.splitFieldsConfig.min
+        newInterval[0] == "["
+          ? props.data[i][props.splitConfig.splitFields] < newInterval[1]
+          : props.data[i][props.splitConfig.splitFields] <= newInterval[1]
       ) {
         result.push(currentArray);
         addRange(
@@ -437,10 +450,12 @@ const splitFun = () => {
         );
         currentArray = [];
       } else if (
-        props.data[i][props.splitConfig.splitFields] >=
-          props.splitFieldsConfig.min &&
-        props.data[i][props.splitConfig.splitFields] <=
-          props.splitFieldsConfig.max
+        newInterval[0] == "["
+          ? props.data[i][props.splitConfig.splitFields] >= newInterval[1]
+          : props.data[i][props.splitConfig.splitFields] > newInterval[1] &&
+            newInterval[3] == "]"
+            ? props.data[i][props.splitConfig.splitFields] <= newInterval[2]
+            : props.data[i][props.splitConfig.splitFields] < newInterval[2]
       ) {
         result.push(currentArray);
         addRange(
@@ -459,14 +474,17 @@ const splitFun = () => {
     /* Compare the previous number to determine the interval
      * Add The default value is 0.5
      */
-    // If the previous number is in the [0.5,1] interval and the current number is greater than 1
+    // If the next number is greater than the max interval and the current number in the interval
     if (
-      props.data[i][props.splitConfig.splitFields] >=
-        props.splitFieldsConfig.min &&
-      props.data[i][props.splitConfig.splitFields] <=
-        props.splitFieldsConfig.max &&
-      props.data[i + 1][props.splitConfig.splitFields] >
-        props.splitFieldsConfig.max
+      (newInterval[0] == "["
+        ? props.data[i][props.splitConfig.splitFields] >= newInterval[1]
+        : props.data[i][props.splitConfig.splitFields] > newInterval[1]) &&
+      (newInterval[3] == "]"
+        ? props.data[i][props.splitConfig.splitFields] <= newInterval[2]
+        : props.data[i][props.splitConfig.splitFields] < newInterval[2]) &&
+      (newInterval[3] == "]"
+        ? props.data[i + 1][props.splitConfig.splitFields] > newInterval[2]
+        : props.data[i + 1][props.splitConfig.splitFields] >= newInterval[2])
     ) {
       result.push(currentArray);
       addRange(
@@ -479,14 +497,17 @@ const splitFun = () => {
       );
       currentArray = [];
     } else if (
-      //If previous number is greater than [0.5,1] interval, and the current number is in interval
+      //If current number is greater than the max interval, and the new number is in the interval
       i > 0 &&
-      props.data[i][props.splitConfig.splitFields] >
-        props.splitFieldsConfig.max &&
-      props.data[i + 1][props.splitConfig.splitFields] >=
-        props.splitFieldsConfig.min &&
-      props.data[i + 1][props.splitConfig.splitFields] <=
-        props.splitFieldsConfig.max
+      (newInterval[3] == "]"
+        ? props.data[i][props.splitConfig.splitFields] > newInterval[2]
+        : props.data[i][props.splitConfig.splitFields] >= newInterval[2]) &&
+      (newInterval[0] == "["
+        ? props.data[i + 1][props.splitConfig.splitFields] >= newInterval[1]
+        : props.data[i + 1][props.splitConfig.splitFields] > newInterval[1]) &&
+      (newInterval[3] == "]"
+        ? props.data[i + 1][props.splitConfig.splitFields] <= newInterval[2]
+        : props.data[i + 1][props.splitConfig.splitFields] < newInterval[2])
     ) {
       result.push(currentArray);
       addRange(
@@ -499,14 +520,17 @@ const splitFun = () => {
       );
       currentArray = [];
     } else if (
-      //If previous number is in the [0.5,1] interval and the new number is less than 0.5
+      //If current number is in the interval and the new number is less than the min interval
       i > 0 &&
-      props.data[i][props.splitConfig.splitFields] >=
-        props.splitFieldsConfig.min &&
-      props.data[i][props.splitConfig.splitFields] <=
-        props.splitFieldsConfig.max &&
-      props.data[i + 1][props.splitConfig.splitFields] <
-        props.splitFieldsConfig.min
+      (newInterval[0] == "["
+        ? props.data[i][props.splitConfig.splitFields] >= newInterval[1]
+        : props.data[i][props.splitConfig.splitFields] > newInterval[1]) &&
+      (newInterval[3] == "]"
+        ? props.data[i][props.splitConfig.splitFields] <= newInterval[2]
+        : props.data[i][props.splitConfig.splitFields] < newInterval[2]) &&
+      (newInterval[0] == "["
+        ? props.data[i + 1][props.splitConfig.splitFields] < newInterval[1]
+        : props.data[i + 1][props.splitConfig.splitFields] <= newInterval[1])
     ) {
       result.push(currentArray);
       addRange(
@@ -519,13 +543,17 @@ const splitFun = () => {
       );
       currentArray = [];
     } else if (
-      //If previous number is less than the [0.5,1] interval and the new number is in [0.5,1] interval
+      //If current number is less than the min interval and the new number is in the interval
       i > 0 &&
-      props.data[i + 1][props.splitConfig.splitFields] >=
-        props.splitFieldsConfig.min &&
-      props.data[i + 1][props.splitConfig.splitFields] <=
-        props.splitFieldsConfig.max &&
-      props.data[i][props.splitConfig.splitFields] < props.splitFieldsConfig.min
+      (newInterval[0] == "["
+        ? props.data[i + 1][props.splitConfig.splitFields] >= newInterval[1]
+        : props.data[i + 1][props.splitConfig.splitFields] > newInterval[1]) &&
+      (newInterval[3] == "]"
+        ? props.data[i + 1][props.splitConfig.splitFields] <= newInterval[2]
+        : props.data[i + 1][props.splitConfig.splitFields] < newInterval[2]) &&
+      (newInterval[0] == "["
+        ? props.data[i][props.splitConfig.splitFields] < newInterval[1]
+        : props.data[i][props.splitConfig.splitFields] <= newInterval[1])
     ) {
       result.push(currentArray);
       addRange(
@@ -538,12 +566,14 @@ const splitFun = () => {
       );
       currentArray = [];
     } else if (
-      //If previous number is greater than the [0.5,1] interval and the new number is less than the [0.5,1] interval
+      //If current number is greater than the max interval and the next number is less than the min interval
       i > 0 &&
-      props.data[i][props.splitConfig.splitFields] >
-        props.splitFieldsConfig.max &&
-      props.data[i + 1][props.splitConfig.splitFields] <
-        props.splitFieldsConfig.min
+      (newInterval[3] == "]"
+        ? props.data[i][props.splitConfig.splitFields] > newInterval[2]
+        : props.data[i][props.splitConfig.splitFields] >= newInterval[2]) &&
+      (newInterval[0] == "["
+        ? props.data[i + 1][props.splitConfig.splitFields] < newInterval[1]
+        : props.data[i + 1][props.splitConfig.splitFields] <= newInterval[1])
     ) {
       result.push(currentArray);
       addRange(
@@ -557,11 +587,14 @@ const splitFun = () => {
 
       currentArray = [];
     } else if (
-      //If previous number is less than the [0.5,1] interval and the new number is greater than the [0.5,1] interval
+      //If next number is less than the the min interval and the current number is greater than the max interval
       i > 0 &&
-      props.data[i + 1][props.splitConfig.splitFields] >
-        props.splitFieldsConfig.max &&
-      props.data[i][props.splitConfig.splitFields] < props.splitFieldsConfig.min
+      (newInterval[3] == "]"
+        ? props.data[i + 1][props.splitConfig.splitFields] > newInterval[2]
+        : props.data[i + 1][props.splitConfig.splitFields] >= newInterval[2]) &&
+      (newInterval[0] == "["
+        ? props.data[i][props.splitConfig.splitFields] < newInterval[1]
+        : props.data[i][props.splitConfig.splitFields] <= newInterval[1])
     ) {
       result.push(currentArray);
       addRange(
