@@ -105,6 +105,7 @@ const emits = defineEmits<{
   (e: "skipProgress", item: any, index: number): void;
   (e: "handlePlay", item: any, index: number): void;
 }>();
+const splitResult = ref([]);
 const height = ref(0);
 const progressBarPlayerBacRef = ref();
 const progressBarPlayerBacFillRef = ref();
@@ -424,6 +425,10 @@ const splitFun = () => {
           ? props.data[i][props.splitConfig.splitFields] > newInterval[2]
           : props.data[i][props.splitConfig.splitFields] >= newInterval[2]
       ) {
+        currentArray.map((item: any) => {
+          item.color = props.splitConfig.outRangeColor;
+          return item;
+        });
         result.push(currentArray);
         addRange(
           result,
@@ -439,6 +444,10 @@ const splitFun = () => {
           ? props.data[i][props.splitConfig.splitFields] < newInterval[1]
           : props.data[i][props.splitConfig.splitFields] <= newInterval[1]
       ) {
+        currentArray.map((item: any) => {
+          item.color = props.splitConfig.outRangeColor;
+          return item;
+        });
         result.push(currentArray);
         addRange(
           result,
@@ -457,6 +466,10 @@ const splitFun = () => {
             ? props.data[i][props.splitConfig.splitFields] <= newInterval[2]
             : props.data[i][props.splitConfig.splitFields] < newInterval[2]
       ) {
+        currentArray.map((item: any) => {
+          props.splitConfig.inRangeColor;
+          return item;
+        });
         result.push(currentArray);
         addRange(
           result,
@@ -486,6 +499,10 @@ const splitFun = () => {
         ? props.data[i + 1][props.splitConfig.splitFields] > newInterval[2]
         : props.data[i + 1][props.splitConfig.splitFields] >= newInterval[2])
     ) {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.inRangeColor;
+        return item;
+      });
       result.push(currentArray);
       addRange(
         result,
@@ -509,6 +526,10 @@ const splitFun = () => {
         ? props.data[i + 1][props.splitConfig.splitFields] <= newInterval[2]
         : props.data[i + 1][props.splitConfig.splitFields] < newInterval[2])
     ) {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.outRangeColor;
+        return item;
+      });
       result.push(currentArray);
       addRange(
         result,
@@ -532,6 +553,10 @@ const splitFun = () => {
         ? props.data[i + 1][props.splitConfig.splitFields] < newInterval[1]
         : props.data[i + 1][props.splitConfig.splitFields] <= newInterval[1])
     ) {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.inRangeColor;
+        return item;
+      });
       result.push(currentArray);
       addRange(
         result,
@@ -555,6 +580,10 @@ const splitFun = () => {
         ? props.data[i][props.splitConfig.splitFields] < newInterval[1]
         : props.data[i][props.splitConfig.splitFields] <= newInterval[1])
     ) {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.outRangeColor;
+        return item;
+      });
       result.push(currentArray);
       addRange(
         result,
@@ -575,6 +604,10 @@ const splitFun = () => {
         ? props.data[i + 1][props.splitConfig.splitFields] < newInterval[1]
         : props.data[i + 1][props.splitConfig.splitFields] <= newInterval[1])
     ) {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.outRangeColor;
+        return item;
+      });
       result.push(currentArray);
       addRange(
         result,
@@ -596,6 +629,10 @@ const splitFun = () => {
         ? props.data[i][props.splitConfig.splitFields] < newInterval[1]
         : props.data[i][props.splitConfig.splitFields] <= newInterval[1])
     ) {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.outRangeColor;
+        return item;
+      });
       result.push(currentArray);
       addRange(
         result,
@@ -608,7 +645,7 @@ const splitFun = () => {
       currentArray = [];
     }
   }
-  console.log(result);
+  splitResult.value = result;
   // Convert SVG elements to XML strings
   const newBacSvg = new XMLSerializer().serializeToString(bacSvg);
   const newFillSvg = new XMLSerializer().serializeToString(svg);
@@ -695,6 +732,7 @@ watch(
   }
 );
 defineExpose({
+  splitResult,
   play,
   pause,
   refresh,

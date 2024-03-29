@@ -169,5 +169,8 @@ const skipHasTipProgress = (item: any) => {
       }
     }
   }
+  .cursor {
+    width: 171px
+  }
 }
 </style>
