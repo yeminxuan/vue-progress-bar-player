@@ -102,7 +102,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emits = defineEmits<{
   (e: "refresh"): void;
   (e: "play"): void;
-  (e: "skipProgress", index: number, item: any): void;
+  (e: "skipProgress", item: any, index: number): void;
   (e: "handlePlay", item: any, index: number): void;
 }>();
 const height = ref(0);
@@ -256,7 +256,7 @@ const changeSlider = (e: MouseEvent) => {
   computedOffsetX(e);
   document.onmousemove = (event) => {
     computedOffsetX(event);
-    emits("skipProgress", dataIndex.value, props.data[dataIndex.value]);
+    emits("skipProgress", props.data[dataIndex.value], dataIndex.value);
   };
   document.onmouseup = (event) => {
     computedOffsetX(event);
