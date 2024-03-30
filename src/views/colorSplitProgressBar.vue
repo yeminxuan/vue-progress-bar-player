@@ -137,6 +137,8 @@ import ProgressBarPlayer from "@packages/progressBarPlayer/index.vue";
 import Example from "@common/example.vue";
 import { ref } from "vue";
 import moment from "moment";
+import { onMounted } from "vue";
+import { nextTick } from "vue";
 const currentDate = ref(
   moment(splitProgressData[0].gpstime).format("yyyy/MM/DD HH:mm:ss")
 );
@@ -144,13 +146,18 @@ const progressBarPlayerRef = ref();
 const progressBarPlayerRef1 = ref();
 const progressBarPlayerRef2 = ref();
 const handleHasTipPlay = (item: any) => {
-  console.log(item);
-
   currentDate.value = moment(item.gpstime).format("yyyy/MM/DD HH:mm:ss");
 };
 const skipHasTipProgress = (item: any) => {
   currentDate.value = moment(item.gpstime).format("yyyy/MM/DD HH:mm:ss");
 };
+onMounted(() => {
+  setTimeout(() => {
+    console.log(progressBarPlayerRef2.value.splitResult);
+    
+    console.log(progressBarPlayerRef2.value.splitResult);
+  });
+});
 </script>
 <style scoped lang="less">
 :deep(.progress-bar-player-wrap) {
@@ -170,7 +177,7 @@ const skipHasTipProgress = (item: any) => {
     }
   }
   .cursor {
-    width: 171px
+    width: 171px;
   }
 }
 </style>

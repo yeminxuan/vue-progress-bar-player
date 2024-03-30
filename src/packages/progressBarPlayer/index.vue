@@ -195,6 +195,7 @@ const updateProgress = () => {
     }
   });
 };
+//  play + 1   dataIndex + 1
 const play = () => {
   isPlay.value = true;
   let targetWidth = widthValues.value[dataIndex.value + 1].procentage;
@@ -255,6 +256,8 @@ const refresh = () => {
 };
 const changeSlider = (e: MouseEvent) => {
   computedOffsetX(e);
+  fillWidth.value = progressBarPlayerBacFillRef.value.clientWidth;
+  emits("skipProgress", props.data[dataIndex.value], dataIndex.value);
   document.onmousemove = (event) => {
     computedOffsetX(event);
     emits("skipProgress", props.data[dataIndex.value], dataIndex.value);
@@ -697,7 +700,7 @@ watch(
           procentage.value >=
           widthValues.value[stagedIndex.value + 1].procentage
         ) {
-          // console.log("Suspend subsequent play");
+          console.log("Suspend subsequent play");
           stagedIndex.value++;
           emits("handlePlay", props.data[stagedIndex.value], stagedIndex.value);
         }
@@ -710,14 +713,10 @@ watch(
             procentage.value >=
             widthValues.value[stagedIndex.value + 1].procentage
           ) {
-            // console.log("Normal playback");
+            console.log("Normal playback");
             if (procentage.value == 100) {
               isPlay.value = false;
               refreshClick.value = false;
-            }
-            if (props.hasRealTimeTipBox) {
-              currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
-              console.log(currentTipHalfWidth.value);
             }
             stagedIndex.value++;
             emits(
@@ -782,6 +781,7 @@ onMounted(async () => {
     overflow: hidden;
     cursor: pointer;
     user-select: none;
+
     .progress-bar-player-fill {
       height: 100%;
       border-radius: 5px;
@@ -790,6 +790,9 @@ onMounted(async () => {
       user-select: none;
       pointer-events: none;
       position: relative;
+      img {
+        position: absolute;
+      }
     }
 
     .refresh {
