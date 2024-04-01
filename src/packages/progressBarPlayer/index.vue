@@ -487,11 +487,10 @@ const splitFun = () => {
       break;
     }
 
-    /* Compare the previous number to determine the interval
-     * Add The default value is 0.5
-     */
+    /* Compare the previous number to determine the interval */
     // If the next number is greater than the max interval and the current number in the interval
     if (
+      i > 0 &&
       (newInterval[0] == "["
         ? props.data[i][props.splitConfig.splitFields] >= newInterval[1]
         : props.data[i][props.splitConfig.splitFields] > newInterval[1]) &&

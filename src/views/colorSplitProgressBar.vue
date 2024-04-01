@@ -138,7 +138,6 @@ import Example from "@common/example.vue";
 import { ref } from "vue";
 import moment from "moment";
 import { onMounted } from "vue";
-import { nextTick } from "vue";
 const currentDate = ref(
   moment(splitProgressData[0].gpstime).format("yyyy/MM/DD HH:mm:ss")
 );
@@ -153,8 +152,6 @@ const skipHasTipProgress = (item: any) => {
 };
 onMounted(() => {
   setTimeout(() => {
-    console.log(progressBarPlayerRef2.value.splitResult);
-    
     console.log(progressBarPlayerRef2.value.splitResult);
   });
 });
