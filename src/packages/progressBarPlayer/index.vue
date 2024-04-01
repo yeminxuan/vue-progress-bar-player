@@ -197,22 +197,18 @@ const updateProgress = () => {
 };
 //  play + 1   dataIndex + 1
 const play = () => {
+  refreshClick.value = true;
   isPlay.value = true;
-  let targetWidth = widthValues.value[dataIndex.value + 1].procentage;
-  //Change the progress bar percentage
+  const targetWidth = widthValues.value[dataIndex.value + 1].procentage;
   procentage.value = targetWidth;
   dataIndex.value++;
-  refreshClick.value = true;
-
+  //If it is playing normally
   if (remainingTime.value == -1) {
     clearInterval(progressTimer.value);
     progressTimer.value = null;
     progressTimer.value = setInterval(updateProgress, props.duration);
-    if (procentage.value == 100) {
-      isPlay.value = false;
-      refreshClick.value = false;
-    }
   } else {
+    //If it is replay after paused
     if (dataIndex.value == props.data.length - 1) {
       setTimeout(() => {
         isPlay.value = false;
