@@ -39,27 +39,30 @@
         >
       </div>
     </div>
-    <CurrentTip
-      v-if="hasRealTimeTipBox"
-      ref="currentTipRef"
-      :style="{
-        transform: currentTipTranslate,
-        transition: isPlay
-          ? `transform ${
-            remainingTime == -1 ? duration / 1000 : remainingTime / 1000
-          }s  linear`
-          : ``,
-      }"
-    >
-      <slot name="currentTip" />
-    </CurrentTip>
+    <Teleport to="body">
+      <CurrentTip
+        v-if="hasRealTimeTipBox"
+        ref="currentTipRef"
+        :style="{
+          transform: currentTipTranslate,
+          transition: isPlay
+            ? `transform ${
+              remainingTime == -1 ? duration / 1000 : remainingTime / 1000
+            }s  linear`
+            : ``,
+        }"
+      >
+        <slot name="currentTip" />
+      </CurrentTip>
+    </Teleport>
   </div>
 </template>
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch, computed } from "vue";
+import { nextTick, ref, watch, computed } from "vue";
 import type { Ref } from "vue";
 import CurrentTip from "@packages/common/currentTip.vue";
 import { isNumeric } from "../utils/utils";
+import { watchEffect } from "vue";
 interface SplitConfig {
   splitFields: string;
   inRangeColor: string;
@@ -656,6 +659,7 @@ const splitFun = () => {
     window.btoa(decodeURIComponent(encodeURIComponent(newFillSvg)));
   bacSvgUrl.value = bacSvgHref;
   splitSvgUrl.value = newFillSvgHref;
+  return result;
 };
 const executeAfterApproximatelyOneSecond = (
   callback: any,
@@ -732,7 +736,12 @@ defineExpose({
   refresh,
   initProgressBar,
 });
-onMounted(async () => {
+watchEffect(async () => {
+  const data = props.data;
+  const interval = props.splitFieldsInterval;
+  if (!data) throw Error("The incoming data is not valid");
+  if (props.isSplit && !interval)
+    throw Error("The interval passed in is not valid");
   await nextTick(() => {
     width.value = progressBarPlayerBacRef.value.clientWidth;
     height.value = progressBarPlayerBacRef.value.clientHeight;

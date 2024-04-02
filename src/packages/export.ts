@@ -2,17 +2,17 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-07 15:54:10
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-03-28 17:41:36
+ * @LastEditTime: 2024-04-02 10:22:31
  * @FilePath: /vue3-process-bar-player/src/packages/export.ts
- * @Description: 
+ * @Description:
  */
 import type { App } from "vue";
 import ProgressBarPlayer from "./progressBarPlayer/index.vue";
-
-export { ProgressBarPlayer };
+import { splitFunMethods } from "@/packages/utils/utils";
+export { ProgressBarPlayer, splitFunMethods };
 export default {
   install(app: App) {
-    app.component('ProgressBarPlayer', ProgressBarPlayer);
+    app.component("ProgressBarPlayer", ProgressBarPlayer);
   },
 };
 
