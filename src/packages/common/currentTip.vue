@@ -48,7 +48,7 @@ defineExpose({
     .centerPoint::after {
       content: "";
       position: absolute;
-      bottom: -8px;
+      bottom: -7px;
       border-left: 8px solid transparent;
       border-right: 8px solid transparent;
       border-top: 8px solid #000;

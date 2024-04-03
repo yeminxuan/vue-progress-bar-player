@@ -88,7 +88,7 @@
         ref="progressBarPlayerRef2"
         :data="splitProgressData"
         :has-real-time-tip-box="true"
-        :duration="100"
+        :duration="1000"
         :is-split="true"
         :split-config="{
           splitFields: 'speed',
