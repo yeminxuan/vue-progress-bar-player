@@ -10,7 +10,8 @@
       ref="progressBarPlayerBacRef"
       class="progress-bar-player-bac"
       :style="{
-        background: isSplit ? `url(${bacSvgUrl})` : progressBacColor,
+        background:
+          isSplit && !performance ? `url(${bacSvgUrl})` : progressBacColor,
       }"
       @mousedown.stop="changeSlider($event)"
     >
@@ -21,7 +22,7 @@
         }"
         class="progress-bar-player-fill"
         :style="{
-          width: isSplit ? '100%' : procentage + '%',
+          width: isSplit && performance ? '100%' : procentage + '%',
           background: isSplit ? 'none' : progressFillColor,
           transition: isPlay
             ? `all ${
@@ -31,7 +32,7 @@
         }"
       >
         <div
-          v-if="isSplit"
+          v-if="isSplit && performance"
           class="mask"
           :style="{
             transform: `translateX(${width * (procentage / 100)}px)`,
@@ -41,9 +42,7 @@
               }s  linear`
               : ``,
           }"
-        >
-          {{ width * (procentage / 100) }}
-        </div>
+        />
         <img
           v-if="isSplit"
           :src="splitSvgUrl"
@@ -51,7 +50,41 @@
           width="100%"
           height="100%"
         >
+        <div
+          v-if="progressTextPosition == 'follow'"
+          class="precent_innerText"
+          :style="{
+            left: follow ? 'unset' : ` 5px`,
+            transition: isPlay
+              ? `all ${
+                remainingTime == -1 ? duration / 1000 : remainingTime / 1000
+              }s  linear`
+              : ``,
+          }"
+        >
+          <span ref="precent_innerTextRef">{{
+            procentage.toFixed(1) + "%"
+          }}</span>
+        </div>
       </div>
+      <div
+        v-if="progressTextPosition == 'inside-right'"
+        class="fixed_right_precent_innerText"
+      >
+        {{ procentage.toFixed(1) + "%" }}
+      </div>
+      <div
+        v-if="progressTextPosition == 'inside-left'"
+        class="fixed_left_precent_innerText"
+      >
+        {{ procentage.toFixed(1) + "%" }}
+      </div>
+    </div>
+    <div
+      v-if="progressTextPosition == 'outside-right'"
+      class="fixed_right_outter_percentText"
+    >
+      {{ procentage.toFixed(1) + "%" }}
     </div>
     <Teleport to="body">
       <CurrentTip
@@ -72,12 +105,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { nextTick, ref, watch, computed } from "vue";
+import { nextTick, ref, watch, computed, onMounted, watchEffect } from "vue";
 import type { Ref } from "vue";
 import CurrentTip from "@packages/common/currentTip.vue";
 import { isNumeric } from "../utils/utils";
-import { watchEffect } from "vue";
-import { onMounted } from "vue";
 interface SplitConfig {
   splitFields: string;
   inRangeColor: string;
@@ -88,6 +119,13 @@ interface SplitConfig {
 interface Props {
   data: any;
   duration: number;
+  performance?: boolean;
+  progressTextPosition?:
+    | "inside-right"
+    | "inside-left"
+    | "follow"
+    | "outside-right"
+    | null;
   progressBacColor?: string;
   progressFillColor?: string;
   isSplit?: boolean;
@@ -98,10 +136,12 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   progressFillColor: "#409eff",
   hasRealTimeTipBox: false,
+  performance: true,
   data: () => [],
   duration: 1000,
   isSplit: false,
   progressBacColor: "#ccc",
+  progressTextPosition: null,
   splitConfig: () => ({
     splitFields: "",
     inRangeColor: "blue",
@@ -124,6 +164,8 @@ const progressBarPlayerBacFillRef = ref();
 const currentTooltipTranslateX = ref(0);
 const currentTooltipTranslateY = ref(0);
 const currentTipHalfWidth = ref(0);
+const follow = ref(false);
+const precent_innerTextRef = ref();
 const currentTipTranslate = computed(() => {
   return `translateX(${
     currentTooltipTranslateX.value +
@@ -207,7 +249,6 @@ const updateProgress = () => {
     }
   });
 };
-//  play + 1   dataIndex + 1
 const play = () => {
   refreshClick.value = true;
   isPlay.value = true;
@@ -311,6 +352,18 @@ const computedOffsetX = (event: MouseEvent) => {
   dataIndex.value = closest.index;
   stagedIndex.value = closest.index;
   procentage.value = currentProcentage;
+  /* progress text start*/
+  nextTick(() => {
+    if (props.progressTextPosition == "follow") {
+      const domWidth = precent_innerTextRef.value.getBoundingClientRect().width;
+      if ((procentage.value / 100) * width.value >= domWidth + 10) {
+        follow.value = true;
+      } else {
+        follow.value = false;
+      }
+    }
+  });
+  /* progress text end*/
   refreshClick.value = false;
   clearInterval(progressTimer.value);
   progressTimer.value = null;
@@ -393,8 +446,10 @@ const splitFun = () => {
   let result: any = [];
   let currentArray: any = [];
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", `0 0 ${width.value} ${height.value}`);
-  svg.setAttribute("shape-rendering", "crispEdges");
+  if (props.performance) {
+    svg.setAttribute("viewBox", `0 0 ${width.value} ${height.value}`);
+    svg.setAttribute("shape-rendering", "crispEdges");
+  }
   const bacSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   const startInterval = props.splitFieldsInterval.split(",")[0];
   const endInterval = props.splitFieldsInterval.split(",")[1];
@@ -779,15 +834,6 @@ watchEffect(async () => {
   await nextTick(() => {
     width.value = progressBarPlayerBacRef.value.clientWidth;
     height.value = progressBarPlayerBacRef.value.clientHeight;
-    if (props.hasRealTimeTipBox) {
-      currentTooltipTranslateX.value =
-        progressBarPlayerBacRef.value.getBoundingClientRect().x;
-      currentTooltipTranslateY.value =
-        progressBarPlayerBacRef.value.getBoundingClientRect().y -
-        currentTipRef.value.getHeight() -
-        10;
-      currentTipHalfWidth.value = currentTipRef.value.getHalfWidth();
-    }
   });
   computedWidth();
   splitFun();
@@ -806,12 +852,31 @@ watchEffect(async () => {
     }
   });
 });
+watch(
+  () => procentage.value,
+  (n, o) => {
+    if (n != o) {
+      if (props.progressTextPosition == "follow") {
+        nextTick(() => {
+          if (precent_innerTextRef.value) {
+            const domWidth =
+              precent_innerTextRef.value.getBoundingClientRect().width;
+            if ((n / 100) * width.value >= domWidth + 10) {
+              follow.value = true;
+            }
+          }
+        });
+      }
+    }
+  }
+);
 </script>
 <style scoped lang="less">
 @import "@assets/style/iconfont.css";
 .progress-bar-player {
   width: 100%;
   display: flex;
+  align-items: center;
   .progress-bar-player-bac {
     flex: 1;
     height: 100%;
@@ -819,10 +884,10 @@ watchEffect(async () => {
     overflow: hidden;
     cursor: pointer;
     user-select: none;
+    position: relative;
 
     .progress-bar-player-fill {
       height: 100%;
-      width: 100%;
       border-radius: 5px;
       border: none;
       user-select: none;
@@ -839,11 +904,54 @@ watchEffect(async () => {
       img {
         position: absolute;
       }
+      .curent {
+        position: absolute;
+        right: 0;
+        width: 1px;
+        height: 100%;
+      }
+      .precent_innerText {
+        height: 100%;
+        top: 0;
+        right: 5px;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        color: #fff;
+        z-index: 2;
+        span {
+          vertical-align: middle;
+        }
+      }
+    }
+    .fixed_right_precent_innerText {
+      height: 100%;
+      top: 0;
+      position: absolute;
+      right: 5px;
+      display: flex;
+      align-items: center;
+      color: #fff;
+      z-index: 2;
+    }
+    .fixed_left_precent_innerText {
+      height: 100%;
+      top: 0;
+      position: absolute;
+      left: 5px;
+      display: flex;
+      align-items: center;
+      color: #fff;
+      z-index: 2;
     }
 
     .refresh {
       transition: width 0s linear;
     }
+  }
+  .fixed_right_outter_percentText {
+    padding-left: 5px;
+    min-width: 60px;
   }
   .refresh {
     border: 1px solid #dcdfe6;
