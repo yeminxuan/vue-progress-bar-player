@@ -54,7 +54,8 @@
           v-if="progressTextPosition == 'follow'"
           class="precent_innerText"
           :style="{
-            left: follow ? 'unset' : ` 5px`,
+            left: follow ? 'unset' : `5px`,
+            right: follow && performance ? `${width - width * (procentage / 100) + 5}px` : 'none',
             transition: isPlay
               ? `all ${
                 remainingTime == -1 ? duration / 1000 : remainingTime / 1000
@@ -136,7 +137,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   progressFillColor: "#409eff",
   hasRealTimeTipBox: false,
-  performance: true,
+  performance: false,
   data: () => [],
   duration: 1000,
   isSplit: false,

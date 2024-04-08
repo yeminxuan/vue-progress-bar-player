@@ -175,6 +175,7 @@
         v-if="splitProgressData.length > 0"
         ref="progressBarPlayerRef5"
         :data="splitProgressData"
+        performance
         :duration="100"
         :is-split="true"
         :split-config="{
@@ -219,6 +220,7 @@
         v-if="splitProgressData.length > 0"
         ref="progressBarPlayerRef6"
         :data="splitProgressData"
+        performance
         :has-real-time-tip-box="true"
         :duration="100"
         :is-split="true"
