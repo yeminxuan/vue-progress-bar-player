@@ -1,9 +1,11 @@
+
 ## 0.0.19 (2024-04-08)
 
 
 ### Bug Fixes
 
 * **progress percentage text:** :bug: fix bug ([8d0fdbe](https://gitee.com/yeminxuan/vue3-process-bar-player/commits/8d0fdbe9694ffd0e711d4a38b2e6191aaaa25b6c))
+* **progress percentage text:** :bug: fix replay bug ([5322d55](https://gitee.com/yeminxuan/vue3-process-bar-player/commits/5322d55db2b82a001dec382637e6cbb274ee8435))
 
 
 ## 0.0.18 (2024-04-08)
