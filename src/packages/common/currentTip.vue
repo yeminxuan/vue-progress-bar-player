@@ -1,7 +1,7 @@
 <template>
   <div
     ref="cursorRef"
-    class="cursor"
+    class="current-position-tooltip"
   >
     <div class="tooltip">
       <slot />

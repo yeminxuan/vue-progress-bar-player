@@ -19,8 +19,8 @@ This project exists thanks to all the people who contribute.
 
 And thank you to all our backers! 🙏
 
-<a href="https://github.com/yeminxuan/vue-progress-player/graphs/contributors">
- <img src="https://contrib.rocks/image?repo=yeminxuan/vue-progress-player" />
+<a href="https://github.com/yeminxuan/vue-progress-bar-player/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=yeminxuan/vue-progress-bar-player" />
 </a>
 
 ## License
