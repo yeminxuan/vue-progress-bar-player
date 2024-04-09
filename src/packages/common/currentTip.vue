@@ -24,7 +24,7 @@ defineExpose({
 });
 </script>
 <style lang="less" scoped>
-.cursor {
+.current-position-tooltip {
   // pointer-events: none;
   position: absolute;
   inset: 0px auto auto 0px;

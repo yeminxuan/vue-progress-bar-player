@@ -1,3 +1,8 @@
+## 0.0.20 (2024-04-09)
+
+
+### Bug Fixes
+* **progress bar player:** :bug: fixed tooltip class name not replce's bug ([61a6b87](https://github.com/yeminxuan/vue-progress-bar-player/commit/61a6b871d0cad4121132a0b1bf41e37d786f35b2))
 
 ## 0.0.19 (2024-04-08)
 
