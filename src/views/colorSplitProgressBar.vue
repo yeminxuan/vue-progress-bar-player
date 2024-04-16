@@ -289,9 +289,9 @@ const skipHasTipProgress = (item: any) => {
   currentDate.value = moment(item.gpstime).format("yyyy/MM/DD HH:mm:ss");
 };
 onMounted(() => {
-  setTimeout(() => {
-    console.log(progressBarPlayerRef2.value.splitResult);
-  });
+  // setTimeout(() => {
+  //   console.log(progressBarPlayerRef6.value.splitResult);
+  // });
 });
 </script>
 <style scoped lang="less">

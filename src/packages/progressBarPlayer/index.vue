@@ -449,6 +449,7 @@ const addRange = (
 const splitFun = () => {
   if (!props.splitFieldsInterval || props.splitFieldsInterval == "") return;
   let result: any = [];
+  let singleResult: any = [];
   let currentArray: any = [];
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   if (props.performance) {
@@ -495,6 +496,7 @@ const splitFun = () => {
           return item;
         });
         result.push(currentArray);
+        // singleResult.push(currentArray);
         addRange(
           result,
           currentArray,
@@ -514,6 +516,7 @@ const splitFun = () => {
           return item;
         });
         result.push(currentArray);
+        // singleResult.push(currentArray);
         addRange(
           result,
           currentArray,
@@ -536,6 +539,7 @@ const splitFun = () => {
           return item;
         });
         result.push(currentArray);
+        // singleResult.push(currentArray);
         addRange(
           result,
           currentArray,
@@ -659,7 +663,7 @@ const splitFun = () => {
       );
       currentArray = [];
     } else if (
-      //If current number is greater than the max interval and the next number is less than the min interval
+      //If current number is greater than the max interval and the next number is less than the min interval.
       i > 0 &&
       (newInterval[3] == "]"
         ? props.data[i][props.splitConfig.splitFields] > newInterval[2]
@@ -684,7 +688,7 @@ const splitFun = () => {
 
       currentArray = [];
     } else if (
-      //If next number is less than the the min interval and the current number is greater than the max interval
+      //If the current number is greater than the max interval and the next number is less than the the min interval.
       i > 0 &&
       (newInterval[3] == "]"
         ? props.data[i + 1][props.splitConfig.splitFields] > newInterval[2]
@@ -707,9 +711,50 @@ const splitFun = () => {
         props.splitConfig.outRangeColor
       );
       currentArray = [];
+    } else if (
+      // If current number is less than the min interval, and next number is less than the min interval too
+      i > 0 &&
+      (newInterval[0] == "["
+        ? props.data[i + 1][props.splitConfig.splitFields] < newInterval[1]
+        : props.data[i + 1][props.splitConfig.splitFields] <= newInterval[1]) &&
+      (newInterval[0] == "["
+        ? props.data[i][props.splitConfig.splitFields] < newInterval[1]
+        : props.data[i][props.splitConfig.splitFields] <= newInterval[1])
+    ) {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.outRangeColor;
+        return item;
+      });
+      singleResult.push(...currentArray);
+    } 
+    else if (
+      // If current number is greater than the max interval, and next number is greater than the max interval too
+      i > 0 &&
+      (newInterval[3] == "]"
+        ? props.data[i + 1][props.splitConfig.splitFields] > newInterval[2]
+        : props.data[i + 1][props.splitConfig.splitFields] >= newInterval[2]) &&
+      (newInterval[3] == "]"
+        ? props.data[i][props.splitConfig.splitFields] > newInterval[2]
+        : props.data[i][props.splitConfig.splitFields] >= newInterval[2])
+    ) {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.outRangeColor;
+        return item;
+      });
+      singleResult.push(...currentArray);
+    } else {
+      currentArray.map((item: any) => {
+        item.color = props.splitConfig.inRangeColor;
+        return item;
+      });
+      singleResult.push(...currentArray);
     }
   }
-  splitResult.value = result;
+  if (singleResult.length == props.data.length) {
+    splitResult.value = singleResult;
+  } else {
+    splitResult.value = result;
+  }
   // Convert SVG elements to XML strings
   const newBacSvg = new XMLSerializer().serializeToString(bacSvg);
   const newFillSvg = new XMLSerializer().serializeToString(svg);
