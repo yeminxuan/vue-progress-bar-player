@@ -496,7 +496,6 @@ const splitFun = () => {
           return item;
         });
         result.push(currentArray);
-        // singleResult.push(currentArray);
         addRange(
           result,
           currentArray,
@@ -516,7 +515,6 @@ const splitFun = () => {
           return item;
         });
         result.push(currentArray);
-        // singleResult.push(currentArray);
         addRange(
           result,
           currentArray,
@@ -539,7 +537,6 @@ const splitFun = () => {
           return item;
         });
         result.push(currentArray);
-        // singleResult.push(currentArray);
         addRange(
           result,
           currentArray,
@@ -552,7 +549,6 @@ const splitFun = () => {
       }
       break;
     }
-
     /* Compare the previous number to determine the interval */
     // If the next number is greater than the max interval and the current number in the interval
     if (
@@ -726,8 +722,7 @@ const splitFun = () => {
         return item;
       });
       singleResult.push(...currentArray);
-    } 
-    else if (
+    } else if (
       // If current number is greater than the max interval, and next number is greater than the max interval too
       i > 0 &&
       (newInterval[3] == "]"
@@ -742,7 +737,21 @@ const splitFun = () => {
         return item;
       });
       singleResult.push(...currentArray);
-    } else {
+    } else if (
+      i > 0 &&
+      (newInterval[0] == "["
+        ? props.data[i + 1][props.splitConfig.splitFields] >= newInterval[1]
+        : props.data[i + 1][props.splitConfig.splitFields] > newInterval[1]) &&
+      (newInterval[3] == "]"
+        ? props.data[i + 1][props.splitConfig.splitFields] <= newInterval[2]
+        : props.data[i + 1][props.splitConfig.splitFields] < newInterval[2]) &&
+      (newInterval[0] == "["
+        ? props.data[i][props.splitConfig.splitFields] >= newInterval[1]
+        : props.data[i][props.splitConfig.splitFields] > newInterval[1]) &&
+      (newInterval[3] == "]"
+        ? props.data[i][props.splitConfig.splitFields] <= newInterval[2]
+        : props.data[i][props.splitConfig.splitFields] < newInterval[2])
+    ) {
       currentArray.map((item: any) => {
         item.color = props.splitConfig.inRangeColor;
         return item;
