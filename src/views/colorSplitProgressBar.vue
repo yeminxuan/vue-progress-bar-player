@@ -266,7 +266,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { splitProgressData } from "@/assets/data";
+import { splitProgressData, manyData } from "@/assets/data";
+import { splitFunMethods } from "@/packages/export";
 import ProgressBarPlayer from "@packages/progressBarPlayer/index.vue";
 import Example from "@common/example.vue";
 import { ref } from "vue";
@@ -289,6 +290,13 @@ const skipHasTipProgress = (item: any) => {
   currentDate.value = moment(item.gpstime).format("yyyy/MM/DD HH:mm:ss");
 };
 onMounted(() => {
+  splitFunMethods(
+    manyData,
+    "[0,21.6]",
+    "speed",
+    "#00ff00",
+    "#ff0000"
+  );
   setTimeout(() => {
     console.log(progressBarPlayerRef6.value.splitResult);
   });

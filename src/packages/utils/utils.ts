@@ -2,7 +2,7 @@
  * @Author: 叶敏轩 mc20000406@163.com
  * @Date: 2024-03-29 13:16:24
  * @LastEditors: 叶敏轩 mc20000406@163.com
- * @LastEditTime: 2024-04-02 11:15:20
+ * @LastEditTime: 2024-04-30 17:09:53
  * @FilePath: /vue3-process-bar-player/src/packages/utils/utils.ts
  * @Description:
  */
@@ -21,7 +21,8 @@ const splitFunMethods = (
   inRangeColor: string,
   outRangeColor: string
 ) => {
-  const result: any = [];
+  let result: any = [];
+  const singleResult: any = [];
   let currentArray: any = [];
   const startInterval = interval.split(",")[0];
   const endInterval = interval.split(",")[1];
@@ -181,10 +182,9 @@ const splitFunMethods = (
         return item;
       });
       result.push(currentArray);
-
       currentArray = [];
     } else if (
-      //If next number is less than the the min interval and the current number is greater than the max interval
+      //If the current number is greater than the max interval and the next number is less than the the min interval.
       i > 0 &&
       (newInterval[3] == "]"
         ? data[i + 1][field] > newInterval[2]
@@ -199,7 +199,62 @@ const splitFunMethods = (
       });
       result.push(currentArray);
       currentArray = [];
+    } else if (
+      // If current number is less than the min interval, and next number is less than the min interval too
+      i > 0 &&
+      (newInterval[0] == "["
+        ? data[i + 1][field] < newInterval[1]
+        : data[i + 1][field] <= newInterval[1]) &&
+      (newInterval[0] == "["
+        ? data[i][field] < newInterval[1]
+        : data[i][field] <= newInterval[1])
+    ) {
+      currentArray.map((item: any) => {
+        item.color = outRangeColor;
+        return item;
+      });
+      singleResult.push(...currentArray);
+    } else if (
+      // If current number is greater than the max interval, and next number is greater than the max interval too
+      i > 0 &&
+      (newInterval[3] == "]"
+        ? data[i + 1][field] > newInterval[2]
+        : data[i + 1][field] >= newInterval[2]) &&
+      (newInterval[3] == "]"
+        ? data[i][field] > newInterval[2]
+        : data[i][field] >= newInterval[2])
+    ) {
+      currentArray.map((item: any) => {
+        item.color = outRangeColor;
+        return item;
+      });
+      singleResult.push(...currentArray);
+    } else if (
+      i > 0 &&
+      (newInterval[0] == "["
+        ? data[i + 1][field] >= newInterval[1]
+        : data[i + 1][field] > newInterval[1]) &&
+      (newInterval[3] == "]"
+        ? data[i + 1][field] <= newInterval[2]
+        : data[i + 1][field] < newInterval[2]) &&
+      (newInterval[0] == "["
+        ? data[i][field] >= newInterval[1]
+        : data[i][field] > newInterval[1]) &&
+      (newInterval[3] == "]"
+        ? data[i][field] <= newInterval[2]
+        : data[i][field] < newInterval[2])
+    ) {
+      currentArray.map((item: any) => {
+        item.color = inRangeColor;
+        return item;
+      });
+      singleResult.push(...currentArray);
     }
+  }
+  if (singleResult.length == data.length) {
+    result = singleResult;
+  } else {
+    result = result;
   }
   return result;
 };
